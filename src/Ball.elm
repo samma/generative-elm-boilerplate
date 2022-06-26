@@ -15,7 +15,11 @@ import Color
 import Canvas exposing (rect)
 import Canvas exposing (Renderable)
 
-type alias Model = (Float, Float, Float)
+type alias Model = {
+    x: Float,
+    y: Float,
+    time: Float
+    }
 
 type Msg = AnimationFrame Posix
 
@@ -27,18 +31,18 @@ main =
 
 init : () -> (Model, Cmd Msg)
 init () =
-    ( (50, 50, 0), Cmd.none )
+    ( {x=50,y=50,time=0}, Cmd.none )
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
-update msg (x,y,time)=
+update msg model =
     case msg of
         AnimationFrame t ->
-            ( (0, 0 , t |> Time.posixToMillis |> toFloat ), Cmd.none )
+            ( {x=0, y=0 , time=t |> Time.posixToMillis |> toFloat }, Cmd.none )
 
 
 subscriptions : Model -> Sub Msg
-subscriptions (x,y,time) =
+subscriptions model =
     onAnimationFrame AnimationFrame
 
 
@@ -64,7 +68,7 @@ armLength =
 
 
 view : Model -> Html.Html Msg
-view (x,y,time) = 
+view model = 
         div
         [ style "display" "flex"
         , style "justify-content" "center"
@@ -74,7 +78,7 @@ view (x,y,time) =
     ( round w , round h )
     []
     [shapes [ fill Color.white ] [ rect ( 0, 0 ) w h ] ,
-    renderItem time]
+    renderItem model.time]
     ]
 
 
