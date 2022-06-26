@@ -40,7 +40,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         AnimationFrame t ->
-            ( { location = boxPosition model, count = model.count + 1 }, Cmd.none )
+            ( { model | count = model.count + 1, location = boxPosition model }, Cmd.none )
 
 
 subscriptions : Model -> Sub Msg
