@@ -15,6 +15,8 @@ import Grid
 import Html exposing (Html)
 import Html.Events exposing (onClick)
 import Time exposing (Posix)
+import Html exposing (div)
+import Html.Attributes exposing (style)
 
 
 type alias Model =
@@ -93,12 +95,17 @@ thickness =
 
 view : Model -> Html Msg
 view ( isRunning, time ) =
-    toHtml ( round w, round h )
+    div
+        [ style "display" "flex"
+        , style "justify-content" "center"
+        , style "align-items" "center"
+        ]
+    [toHtml ( round w, round h )
         [ onClick ToggleRunning ]
-        (shapes [ fill Color.white ] [ rect ( 0, 0 ) w h ]
+        (shapes [ fill Color.darkOrange ] [ rect ( 0, 0 ) w h ]
             :: renderItems time
         )
-
+    ]
 
 renderItems time =
     Grid.fold2d { rows = gridSize, cols = gridSize } 
