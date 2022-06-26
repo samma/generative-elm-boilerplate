@@ -14,12 +14,18 @@ import Canvas.Settings exposing (fill)
 import Color
 import Canvas exposing (rect)
 import Canvas exposing (Renderable)
+import Arc2d exposing (pointOn)
 
 type alias Model = {
-    x: Float,
-    y: Float,
+    location : Point,
     time: Float
     }
+
+type alias Point = {
+    x : Float,
+    y : Float
+    }
+
 
 type Msg = AnimationFrame Posix
 
@@ -31,14 +37,17 @@ main =
 
 init : () -> (Model, Cmd Msg)
 init () =
-    ( {x=50,y=50,time=0}, Cmd.none )
+    ( { location={x = 0, y = 0}, time=0}, Cmd.none )
+
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
+    let position = boxPosition model
+    in
     case msg of
         AnimationFrame t ->
-            ( {x=0, y=0 , time=t |> Time.posixToMillis |> toFloat }, Cmd.none )
+            ( {location = position, time=t |> Time.posixToMillis |> toFloat }, Cmd.none )
 
 
 subscriptions : Model -> Sub Msg
@@ -81,15 +90,17 @@ view model =
     renderItem model]
     ]
 
+boxPosition : Model -> Point
+boxPosition model =
+
+    {  x= sin(speed * model.time / 1000) * armLength, 
+    y = cos(speed * model.time / 1000) * armLength }
 
 renderItem : Model -> Renderable
 renderItem model =
     let
-        x = sin(speed * model.time / 1000) * armLength
-        y = cos(speed * model.time / 1000) * armLength
-
         originx = w / 2
         originy = h / 2
     in
-        shapes [ fill Color.darkOrange ] [ rect ( originx+x, originy+y ) size size ]
+        shapes [ fill Color.darkOrange ] [ rect ( originx+model.location.x, originy+model.location.y ) size size ]
 
