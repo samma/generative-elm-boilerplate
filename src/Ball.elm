@@ -1,20 +1,18 @@
 module Ball exposing (main)
 
-import Arc2d exposing (pointOn)
 import Browser
 import Browser.Events exposing (onAnimationFrame)
-import Canvas exposing (Renderable, circle, rect, shapes, toHtml)
-import Canvas.Settings exposing (fill)
-import Color
+import Canvas exposing (..)
+import Canvas.Settings exposing (..)
+import Color exposing (..)
 import Html exposing (div)
 import Html.Attributes exposing (style)
-import Html.Events exposing (onClick)
 import Time exposing (Posix)
 
 
 type alias Model =
     { location : Point
-    , time : Float
+    , count : Float
     }
 
 
@@ -35,22 +33,18 @@ main =
 
 init : () -> ( Model, Cmd Msg )
 init () =
-    ( { location = { x = 0, y = 0 }, time = 0 }, Cmd.none )
+    ( { location = { x = 0, y = 0 }, count = 0 }, Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    let
-        position =
-            boxPosition model
-    in
     case msg of
         AnimationFrame t ->
-            ( { location = position, time = t |> Time.posixToMillis |> toFloat }, Cmd.none )
+            ( { location = boxPosition model, count = model.count + 1 }, Cmd.none )
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions _ =
     onAnimationFrame AnimationFrame
 
 
@@ -66,17 +60,12 @@ w =
 
 size : Float
 size =
-    50
+    5
 
 
 speed : Float
 speed =
-    2
-
-
-armLength : Float
-armLength =
-    200
+    10
 
 
 view : Model -> Html.Html Msg
@@ -95,10 +84,15 @@ view model =
         ]
 
 
+armlength : Float -> Float
+armlength count =
+    count / 5
+
+
 boxPosition : Model -> Point
 boxPosition model =
-    { x = sin (speed * model.time / 1000) * armLength
-    , y = cos (speed * model.time / 1000) * armLength
+    { x = sin (speed * model.count / 60) * armlength model.count
+    , y = cos (speed * model.count / 60) * armlength model.count
     }
 
 
