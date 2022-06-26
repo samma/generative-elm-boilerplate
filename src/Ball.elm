@@ -27,12 +27,14 @@ main =
 
 init : () -> (Model, Cmd Msg)
 init () =
-    ( (0, 0, 0), Cmd.none )
+    ( (50, 50, 0), Cmd.none )
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
-update msg (x,y,time) =
-    ( (x,y,time), Cmd.none )
+update msg (x,y,time)=
+    case msg of
+        AnimationFrame t ->
+            ( (0, 0 , t |> Time.posixToMillis |> toFloat ), Cmd.none )
 
 
 subscriptions : Model -> Sub Msg
@@ -49,8 +51,16 @@ w : Float
 w =
     1000
 
+size : Float
+size =
+    50
+
 speed : Float
 speed = 1
+
+armLength : Float
+armLength =
+    100
 
 
 view : Model -> Html.Html Msg
@@ -63,15 +73,19 @@ view (x,y,time) =
     [Canvas.toHtml 
     ( round w , round h )
     []
-    [shapes [ fill Color.white ] [ rect ( 0, 0 ) w h ]        ]
+    [shapes [ fill Color.white ] [ rect ( 0, 0 ) w h ] ,
+    renderItem time]
     ]
 
 
 renderItem : Float -> Renderable
 renderItem time =
     let
-        x = time * speed
-        y = time * speed
+        x = sin(speed * time / 1000) * armLength
+        y = cos(speed * time/ 1000) * armLength
+
+        originx = w / 2
+        originy = h / 2
     in
-        shapes [ fill Color.darkOrange ] [ rect ( x, y ) w h ]
+        shapes [ fill Color.darkOrange ] [ rect ( originx+x, originy+y ) size size ]
 
