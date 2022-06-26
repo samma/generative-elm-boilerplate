@@ -40,7 +40,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         AnimationFrame t ->
-            ( { model | count = model.count + 1, location = boxPosition model }, Cmd.none )
+            ( { model | count = model.count + 1, location = nextLocation model }, Cmd.none )
 
 
 subscriptions : Model -> Sub Msg
@@ -89,8 +89,8 @@ armlength count =
     count / 5
 
 
-boxPosition : Model -> Point
-boxPosition model =
+nextLocation : Model -> Point
+nextLocation model =
     { x = sin (speed * model.count / 60) * armlength model.count
     , y = cos (speed * model.count / 60) * armlength model.count
     }
