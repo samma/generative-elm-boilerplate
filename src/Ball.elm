@@ -78,15 +78,15 @@ view model =
     ( round w , round h )
     []
     [shapes [ fill Color.white ] [ rect ( 0, 0 ) w h ] ,
-    renderItem model.time]
+    renderItem model]
     ]
 
 
-renderItem : Float -> Renderable
-renderItem time =
+renderItem : Model -> Renderable
+renderItem model =
     let
-        x = sin(speed * time / 1000) * armLength
-        y = cos(speed * time/ 1000) * armLength
+        x = sin(speed * model.time / 1000) * armLength
+        y = cos(speed * model.time / 1000) * armLength
 
         originx = w / 2
         originy = h / 2
