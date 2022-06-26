@@ -12,11 +12,10 @@ import Canvas.Settings exposing (..)
 import Canvas.Settings.Advanced exposing (..)
 import Color exposing (Color)
 import Grid
-import Html exposing (Html)
+import Html exposing (Html, div)
+import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
 import Time exposing (Posix)
-import Html exposing (div)
-import Html.Attributes exposing (style)
 
 
 type alias Model =
@@ -100,15 +99,16 @@ view ( isRunning, time ) =
         , style "justify-content" "center"
         , style "align-items" "center"
         ]
-    [toHtml ( round w, round h )
-        [ onClick ToggleRunning ]
-        (shapes [ fill Color.darkOrange ] [ rect ( 0, 0 ) w h ]
-            :: renderItems time
-        )
-    ]
+        [ toHtml ( round w, round h )
+            [ onClick ToggleRunning ]
+            (shapes [ fill Color.darkOrange ] [ rect ( 0, 0 ) w h ]
+                :: renderItems time
+            )
+        ]
+
 
 renderItems time =
-    Grid.fold2d { rows = gridSize, cols = gridSize } 
+    Grid.fold2d { rows = gridSize, cols = gridSize }
         (renderItem time)
         []
 
@@ -142,7 +142,6 @@ renderItem time ( col, row ) lines =
 
         rotation =
             initialRotation + rotationModifier * pi
-
     in
     shapes
         [ transform [ translate x y, rotate rotation, translate -x -y ]
