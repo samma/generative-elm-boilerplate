@@ -3,7 +3,7 @@ module Ball exposing (main)
 import Arc2d exposing (pointOn)
 import Browser
 import Browser.Events exposing (onAnimationFrame)
-import Canvas exposing (Renderable, rect, shapes, toHtml)
+import Canvas exposing (Renderable, circle, rect, shapes, toHtml)
 import Canvas.Settings exposing (fill)
 import Color
 import Html exposing (div)
@@ -71,12 +71,12 @@ size =
 
 speed : Float
 speed =
-    1
+    2
 
 
 armLength : Float
 armLength =
-    100
+    200
 
 
 view : Model -> Html.Html Msg
@@ -89,8 +89,8 @@ view model =
         [ Canvas.toHtml
             ( round w, round h )
             []
-            [ shapes [ fill Color.white ] [ rect ( 0, 0 ) w h ]
-            , renderItem model
+            [ -- shapes [ fill Color.white ] [ rect ( 0, 0 ) w h ] ,
+              renderItem model
             ]
         ]
 
@@ -111,4 +111,5 @@ renderItem model =
         originy =
             h / 2
     in
-    shapes [ fill Color.darkOrange ] [ rect ( originx + model.location.x, originy + model.location.y ) size size ]
+    shapes [ fill Color.darkOrange ]
+        [ circle ( originx + model.location.x, originy + model.location.y ) size ]
