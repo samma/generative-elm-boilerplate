@@ -7,13 +7,20 @@ import Canvas.Settings exposing (..)
 import Color exposing (..)
 import Html exposing (div)
 import Html.Attributes exposing (style)
+import Json.Decode as D
+import Json.Encode as E
 import Time exposing (Posix)
 
 
 type alias Model =
     { location : Point
     , count : Float
+    , flags : Flags
     }
+
+
+type Msg
+    = AnimationFrame Posix
 
 
 type alias Point =
@@ -22,18 +29,41 @@ type alias Point =
     }
 
 
-type Msg
-    = AnimationFrame Posix
+type alias Flags =
+    { fxhash : String
+    , isFxpreview : Bool
+    }
 
 
-main : Program () Model Msg
+decoder : D.Decoder Flags
+decoder =
+    D.map2 Flags
+        (D.field "fxhash" D.string)
+        (D.field "isFxpreview" D.bool)
+
+
+main : Program E.Value Model Msg
 main =
     Browser.element { init = init, update = update, subscriptions = subscriptions, view = view }
 
 
-init : () -> ( Model, Cmd Msg )
-init () =
-    ( { location = { x = 0, y = 0 }, count = 0 }, Cmd.none )
+init : E.Value -> ( Model, Cmd Msg )
+init flags =
+    ( -- Init the model with the flags from fxhash which is stored in the head of index.html
+      case D.decodeValue decoder flags of
+        Ok decodedFlags ->
+            { location = { x = 0, y = 0 }
+            , count = 0
+            , flags = decodedFlags
+            }
+
+        Err _ ->
+            { location = { x = 0.0, y = 0.0 }
+            , count = 0.0
+            , flags = { fxhash = "", isFxpreview = False }
+            }
+    , Cmd.none
+    )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -78,7 +108,7 @@ view model =
         [ Canvas.toHtml
             ( round w, round h )
             []
-            [ -- shapes [ fill Color.white ] [ rect ( 0, 0 ) w h ] ,
+            [ -- shapes [ fill Color.white ] [ rect ( 0, 0 ) w h ]
               renderItem model
             ]
         ]
