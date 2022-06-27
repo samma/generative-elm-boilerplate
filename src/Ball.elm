@@ -44,6 +44,7 @@ type alias Model =
     , count : Float
     , flags : Flags
     , seed : Seed
+    , pieceSettings : PieceSettings
     }
 
 
@@ -60,9 +61,9 @@ type alias Point =
 
 type alias PieceSettings =
     { color : Color
-    , radius : Float
+    , armLength : Float
     , speed : Float
-    , direction : Float
+    , size : Float
     }
 
 
@@ -71,14 +72,24 @@ main =
     Browser.element { init = init, update = update, subscriptions = subscriptions, view = view }
 
 
-seed0 : Model -> Seed
-seed0 model =
-    Random.initialSeed (Maybe.withDefault 0 (String.toInt (Hash.toString (Hash.fromString model.flags.fxhash))))
-
-
-randomNum : Generator Float
-randomNum =
+zeroToOnegenerator : Generator Float
+zeroToOnegenerator =
     Random.float 0 1
+
+
+armLengthgenerator : Generator Float
+armLengthgenerator =
+    Random.float 0.1 0.2
+
+
+speedGenerator : Generator Float
+speedGenerator =
+    Random.float 5 100
+
+
+sizeGenerator : Generator Float
+sizeGenerator =
+    Random.float 1 5
 
 
 init : E.Value -> ( Model, Cmd Msg )
@@ -86,10 +97,33 @@ init flags =
     ( -- Init the model with the flags from fxhash which is stored in the head of index.html
       case D.decodeValue decoder flags of
         Ok decodedFlags ->
+            let
+                initialSeed =
+                    Random.initialSeed (Maybe.withDefault 0 (String.toInt (Hash.toString (Hash.fromString decodedFlags.fxhash))))
+
+                -- TODO is this way of generating unque random numbers with known seeds the only way?
+                -- Note that seeds are sort of daisyChained, this allows different deterministic random number to be generated
+                ( armLength, seed1 ) =
+                    Random.step armLengthgenerator initialSeed
+
+                ( speed, seed2 ) =
+                    Random.step speedGenerator seed1
+
+                ( size, seed3 ) =
+                    Random.step sizeGenerator seed2
+
+                pieceSettings =
+                    { color = Color.orange
+                    , armLength = armLength
+                    , speed = speed
+                    , size = size
+                    }
+            in
             { location = { x = 0, y = 0 }
             , count = 0.0
             , flags = decodedFlags
-            , seed = Random.initialSeed (Maybe.withDefault 0 (String.toInt (Hash.toString (Hash.fromString decodedFlags.fxhash))))
+            , seed = seed3
+            , pieceSettings = pieceSettings
             }
 
         Err _ ->
@@ -97,6 +131,12 @@ init flags =
             , count = 0.0
             , flags = { fxhash = "", isFxpreview = False }
             , seed = Random.initialSeed (Maybe.withDefault 0 (String.toInt (Hash.toString (Hash.fromString ""))))
+            , pieceSettings =
+                { color = Color.orange
+                , armLength = 0
+                , speed = 0
+                , size = 0
+                }
             }
     , Cmd.none
     )
@@ -110,7 +150,7 @@ update msg model =
                 -- TODO, how can this be DRY and clean?
                 ( { model
                     | count = model.count + 1
-                    , location = nextLocation model (pieceSettings model)
+                    , location = nextLocation model
                   }
                 , fxpreview "FxPreview"
                   -- Decieds when FxHash captures the preview image of the piece.
@@ -119,15 +159,15 @@ update msg model =
             else
                 ( { model
                     | count = model.count + 1
-                    , location = nextLocation model (pieceSettings model)
+                    , location = nextLocation model
                   }
                 , Cmd.none
                 )
 
         NewRandomNumber ->
             let
-                ( newValue, newSeed ) =
-                    Random.step randomNum model.seed
+                ( _, newSeed ) =
+                    Random.step zeroToOnegenerator model.seed
 
                 --a = Debug.log "generated a new value" newValue
             in
@@ -149,25 +189,6 @@ w =
     1000
 
 
-size : Float
-size =
-    5
-
-
-speed : Float
-speed =
-    10
-
-
-pieceSettings : Model -> PieceSettings
-pieceSettings model =
-    { color = Color.orange
-    , radius = Tuple.first (Random.step randomNum model.seed)
-    , speed = 10
-    , direction = 0
-    }
-
-
 view : Model -> Html.Html Msg
 view model =
     div
@@ -184,15 +205,10 @@ view model =
         ]
 
 
-armlength : Float -> Float
-armlength count =
-    count / 5
-
-
-nextLocation : Model -> PieceSettings -> Point
-nextLocation model settings =
-    { x = sin ((pieceSettings model).radius * model.count / 60) * armlength model.count
-    , y = cos (settings.speed * model.count / 60) * armlength model.count
+nextLocation : Model -> Point
+nextLocation model =
+    { x = sin (model.pieceSettings.speed * model.count / 60) * model.pieceSettings.armLength * model.count
+    , y = cos (model.pieceSettings.speed * model.count / 60) * model.pieceSettings.armLength * model.count
     }
 
 
@@ -206,4 +222,4 @@ renderItem model =
             h / 2
     in
     shapes [ fill Color.darkOrange ]
-        [ circle ( originx + model.location.x, originy + model.location.y ) size ]
+        [ circle ( originx + model.location.x, originy + model.location.y ) model.pieceSettings.size ]
