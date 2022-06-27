@@ -43,16 +43,26 @@ type alias Model =
     { location : Point
     , count : Float
     , flags : Flags
+    , seed : Seed
     }
 
 
 type Msg
     = AnimationFrame Posix
+    | NewRandomNumber
 
 
 type alias Point =
     { x : Float
     , y : Float
+    }
+
+
+type alias PieceSettings =
+    { color : Color
+    , radius : Float
+    , speed : Float
+    , direction : Float
     }
 
 
@@ -66,13 +76,9 @@ seed0 model =
     Random.initialSeed (Maybe.withDefault 0 (String.toInt (Hash.toString (Hash.fromString model.flags.fxhash))))
 
 
-randomNum : Model -> Float
-randomNum model =
-    let
-        s =
-            seed0 model
-    in
-    Tuple.first (Random.step (Random.float 0 1) s)
+randomNum : Generator Float
+randomNum =
+    Random.float 0 1
 
 
 init : E.Value -> ( Model, Cmd Msg )
@@ -83,12 +89,14 @@ init flags =
             { location = { x = 0, y = 0 }
             , count = 0.0
             , flags = decodedFlags
+            , seed = Random.initialSeed (Maybe.withDefault 0 (String.toInt (Hash.toString (Hash.fromString decodedFlags.fxhash))))
             }
 
         Err _ ->
             { location = { x = 0.0, y = 0.0 }
             , count = 0.0
             , flags = { fxhash = "", isFxpreview = False }
+            , seed = Random.initialSeed (Maybe.withDefault 0 (String.toInt (Hash.toString (Hash.fromString ""))))
             }
     , Cmd.none
     )
@@ -102,7 +110,7 @@ update msg model =
                 -- TODO, how can this be DRY and clean?
                 ( { model
                     | count = model.count + 1
-                    , location = nextLocation model
+                    , location = nextLocation model (pieceSettings model)
                   }
                 , fxpreview "FxPreview"
                   -- Decieds when FxHash captures the preview image of the piece.
@@ -111,10 +119,19 @@ update msg model =
             else
                 ( { model
                     | count = model.count + 1
-                    , location = nextLocation model
+                    , location = nextLocation model (pieceSettings model)
                   }
                 , Cmd.none
                 )
+
+        NewRandomNumber ->
+            let
+                ( newValue, newSeed ) =
+                    Random.step randomNum model.seed
+
+                --a = Debug.log "generated a new value" newValue
+            in
+            ( { model | seed = newSeed }, Cmd.none )
 
 
 subscriptions : Model -> Sub Msg
@@ -142,6 +159,15 @@ speed =
     10
 
 
+pieceSettings : Model -> PieceSettings
+pieceSettings model =
+    { color = Color.orange
+    , radius = Tuple.first (Random.step randomNum model.seed)
+    , speed = 10
+    , direction = 0
+    }
+
+
 view : Model -> Html.Html Msg
 view model =
     div
@@ -163,10 +189,10 @@ armlength count =
     count / 5
 
 
-nextLocation : Model -> Point
-nextLocation model =
-    { x = sin (speed * model.count / 60) * armlength model.count
-    , y = cos (speed * model.count / 60) * armlength model.count
+nextLocation : Model -> PieceSettings -> Point
+nextLocation model settings =
+    { x = sin ((pieceSettings model).radius * model.count / 60) * armlength model.count
+    , y = cos (settings.speed * model.count / 60) * armlength model.count
     }
 
 
@@ -181,8 +207,3 @@ renderItem model =
     in
     shapes [ fill Color.darkOrange ]
         [ circle ( originx + model.location.x, originy + model.location.y ) size ]
-
-
-randomCoord : Float -> Random.Generator Float
-randomCoord max =
-    Random.float 0 max
