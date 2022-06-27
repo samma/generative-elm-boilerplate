@@ -55,6 +55,10 @@
       , flags: fxFlags
     });
 
+    app.ports.fxpreview.subscribe(function (message) {
+      fxpreview()
+    });
+
   </script>
 </body>
 

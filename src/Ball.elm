@@ -1,4 +1,4 @@
-module Ball exposing (main)
+port module Ball exposing (main)
 
 import Browser
 import Browser.Events exposing (onAnimationFrame)
@@ -10,6 +10,30 @@ import Html.Attributes exposing (style)
 import Json.Decode as D
 import Json.Encode as E
 import Time exposing (Posix)
+
+
+
+-- Javascript interop, trigger fxpreview
+
+
+port fxpreview : String -> Cmd msg
+
+
+
+-- Used for getting fxhash settings from javascript
+
+
+type alias Flags =
+    { fxhash : String
+    , isFxpreview : Bool
+    }
+
+
+decoder : D.Decoder Flags
+decoder =
+    D.map2 Flags
+        (D.field "fxhash" D.string)
+        (D.field "isFxpreview" D.bool)
 
 
 type alias Model =
@@ -27,19 +51,6 @@ type alias Point =
     { x : Float
     , y : Float
     }
-
-
-type alias Flags =
-    { fxhash : String
-    , isFxpreview : Bool
-    }
-
-
-decoder : D.Decoder Flags
-decoder =
-    D.map2 Flags
-        (D.field "fxhash" D.string)
-        (D.field "isFxpreview" D.bool)
 
 
 main : Program E.Value Model Msg
@@ -69,8 +80,24 @@ init flags =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        AnimationFrame t ->
-            ( { model | count = model.count + 1, location = nextLocation model }, Cmd.none )
+        AnimationFrame _ ->
+            if model.count == 100 then
+                -- TODO, how can this be DRY and clean?
+                ( { model
+                    | count = model.count + 1
+                    , location = nextLocation model
+                  }
+                , fxpreview "FxPreview"
+                  -- Decieds when FxHash captures the preview image of the piece.
+                )
+
+            else
+                ( { model
+                    | count = model.count + 1
+                    , location = nextLocation model
+                  }
+                , Cmd.none
+                )
 
 
 subscriptions : Model -> Sub Msg
