@@ -5,10 +5,13 @@ import Browser.Events exposing (onAnimationFrame)
 import Canvas exposing (..)
 import Canvas.Settings exposing (..)
 import Color exposing (..)
+import Hash exposing (Hash)
 import Html exposing (div)
 import Html.Attributes exposing (style)
 import Json.Decode as D
 import Json.Encode as E
+import Random exposing (..)
+import String exposing (toInt)
 import Time exposing (Posix)
 
 
@@ -58,13 +61,27 @@ main =
     Browser.element { init = init, update = update, subscriptions = subscriptions, view = view }
 
 
+seed0 : Model -> Seed
+seed0 model =
+    Random.initialSeed (Maybe.withDefault 0 (String.toInt (Hash.toString (Hash.fromString model.flags.fxhash))))
+
+
+randomNum : Model -> Float
+randomNum model =
+    let
+        s =
+            seed0 model
+    in
+    Tuple.first (Random.step (Random.float 0 1) s)
+
+
 init : E.Value -> ( Model, Cmd Msg )
 init flags =
     ( -- Init the model with the flags from fxhash which is stored in the head of index.html
       case D.decodeValue decoder flags of
         Ok decodedFlags ->
             { location = { x = 0, y = 0 }
-            , count = 0
+            , count = 0.0
             , flags = decodedFlags
             }
 
@@ -164,3 +181,8 @@ renderItem model =
     in
     shapes [ fill Color.darkOrange ]
         [ circle ( originx + model.location.x, originy + model.location.y ) size ]
+
+
+randomCoord : Float -> Random.Generator Float
+randomCoord max =
+    Random.float 0 max
