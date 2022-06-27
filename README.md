@@ -11,7 +11,7 @@ Building a regular version
 elm-live src/Ball.elm --open -- --output=ball.js
 
 To build and optimize use, and make sure index.html points at ball.min.js
-./optmize.sh Ball.elm
+./optmize.sh src/Ball.elm
 
 Files that should be zipped
 ball.min.js
