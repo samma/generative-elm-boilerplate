@@ -84,7 +84,7 @@ armLengthgenerator =
 
 speedGenerator : Generator Float
 speedGenerator =
-    Random.float 5 100
+    Random.float 5 99
 
 
 sizeGenerator : Generator Float
