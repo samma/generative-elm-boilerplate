@@ -81,21 +81,20 @@ view model =
             [ stroke Color.brown
             , lineWidth 8
             , lineCap RoundCap
-            , lineDash [ 300 ]
             ]
             (drawLines model.seed 0 [])
         , shapes
             [ stroke Color.darkRed
             , lineWidth 4
             , lineCap RoundCap
-            , lineDash [ 300 ]
+            , lineDash [ 30 ]
             ]
             (drawLines (Random.initialSeed (floor (1 * 10000))) 0 [])
         ]
 
 
 step =
-    45
+    30
 
 
 cols =
@@ -141,7 +140,7 @@ randomLine seed x y width height =
 
 
 randomBool =
-    Random.map (\n -> n < 0.5) (Random.float 0 1)
+    Random.map (\n -> n < 0.97) (Random.float 0 1)
 
 
 diagonalLine seed x y width height =
@@ -177,7 +176,7 @@ drawLine ( start, end ) seed =
         path start [ lineTo end ]
 
     else
-        circle start 20
+        circle start (step * 1.5)
 
 
 
