@@ -49,14 +49,12 @@
     var fxFlags = { fxhash, isFxpreview }
     console.log(fxFlags)
 
-    var app = Elm.Ball.init({
+    var app = Elm.TiledLines.init({
       node: document.querySelector("main")
-      , flags: fxFlags
+      , flags: 2.0
     });
 
-    app.ports.fxpreview.subscribe(function (message) {
-      fxpreview()
-    });
+
 
   </script>
 </body>
