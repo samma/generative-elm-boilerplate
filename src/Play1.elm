@@ -119,7 +119,7 @@ maxIter =
 
 gridSize : number
 gridSize =
-    40
+    50
 
 
 cellSize : Float
@@ -158,11 +158,12 @@ drawPiece items model =
     Grid.fold2d
         { rows = gridSize, cols = gridSize }
         renderItem
-        items
+        ( model, items )
+        |> Tuple.second
 
 
-renderItem : ( Int, Int ) -> List Renderable -> List Renderable
-renderItem ( col, row ) items =
+renderItem : ( Int, Int ) -> ( Model, List Renderable ) -> ( Model, List Renderable )
+renderItem ( col, row ) ( model, items ) =
     let
         ( colf, rowf ) =
             ( toFloat col, toFloat row )
@@ -178,10 +179,12 @@ renderItem ( col, row ) items =
         blue =
             noise y x
     in
-    shapes
+    ( model
+    , shapes
         [ fill (Color.rgba red 0 blue 1) ]
         [ circle ( x, y ) (cellSize / 1.75) ]
         :: items
+    )
 
 
 
