@@ -66,7 +66,7 @@ update msg model =
                 ( { model | count = model.count + 1 }, Cmd.none )
 
             else
-                ( { model | count = 50 }, Cmd.none )
+                ( model, Cmd.none )
 
 
 h : number
@@ -81,7 +81,7 @@ w =
 
 cellSize : Float
 cellSize =
-    15
+    25
 
 
 numRows : Model -> Int
@@ -103,7 +103,11 @@ view model =
     Canvas.toHtml
         ( w, h )
         []
-        artWork
+        (shapes
+            [ fill Color.black ]
+            [ rect ( 0, 0 ) w h ]
+            :: artWork
+        )
 
 
 drawPiece : List Renderable -> Model -> List Renderable
