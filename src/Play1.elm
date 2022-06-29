@@ -168,8 +168,8 @@ iterateModel model =
     model
 
 
-nextVals : List ReactionValue -> List ReactionValue -> ( List ReactionValue, List ReactionValue )
-nextVals uVals vVals =
+nextVals : List ReactionValue -> List ReactionValue -> Model -> ( List ReactionValue, List ReactionValue )
+nextVals uVals vVals model =
     let
         uArr =
             fromList uVals
@@ -177,20 +177,32 @@ nextVals uVals vVals =
         vArr =
             fromList vVals
 
-        fetchCenter x y arr =
+        getCenter x y arr =
             Maybe.withDefault (rVal x y 0.0) (get (coordToIndex ( x, y )) arr)
 
         getUp x y arr =
-            fetchCenter x (y - 1) arr
+            getCenter x (y - 1) arr
 
         getDown x y arr =
-            fetchCenter x (y + 1) arr
+            getCenter x (y + 1) arr
 
         getLeft x y arr =
-            fetchCenter (x - 1) y arr
+            getCenter (x - 1) y arr
 
         getRight x y arr =
-            fetchCenter (x + 1) y arr
+            getCenter (x + 1) y arr
+
+        uLap x y =
+            ((getRight x y uArr).value + (getLeft x y uArr).value + (getUp x y uArr).value + (getDown x y uArr).value - 4 * (getCenter x y uArr).value) / (delta_h ^ 2)
+
+        vLap x y =
+            ((getRight x y vArr).value + (getLeft x y vArr).value + (getUp x y vArr).value + (getDown x y vArr).value - 4 * (getCenter x y vArr).value) / (delta_h ^ 2)
+
+        next_u x y =
+            (getCenter x y uArr).value + ((model.a * ((getCenter x y uArr).value - model.h)) + (model.b * (getCenter x y vArr).value - model.k) + delta_u * uLap x y) * delta_t
+
+        next_v x y =
+            (getCenter x y vArr).value + ((model.c * ((getCenter x y uArr).value - model.h)) + (model.d * (getCenter x y vArr).value - model.k) + delta_v * vLap x y) * delta_t
     in
     ( uVals, vVals )
 
