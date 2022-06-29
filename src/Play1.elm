@@ -17,7 +17,7 @@ import Time exposing (Posix)
 
 type alias Model =
     { seed : Random.Seed
-    , count : Float
+    , count : Int
     }
 
 
@@ -62,7 +62,11 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         AnimationFrame _ ->
-            ( { model | count = model.count + 1 }, Cmd.none )
+            if model.count < 50 then
+                ( { model | count = model.count + 1 }, Cmd.none )
+
+            else
+                ( { model | count = 50 }, Cmd.none )
 
 
 h : number
@@ -77,17 +81,17 @@ w =
 
 cellSize : Float
 cellSize =
-    h / numRows
+    15
 
 
-numRows : number
-numRows =
-    50
+numRows : Model -> Int
+numRows model =
+    model.count
 
 
-numCols : number
-numCols =
-    numRows
+numCols : Model -> Int
+numCols model =
+    numRows model
 
 
 view : Model -> Html Msg
@@ -105,7 +109,7 @@ view model =
 drawPiece : List Renderable -> Model -> List Renderable
 drawPiece items model =
     Grid.fold2d
-        { rows = numRows, cols = numCols }
+        { rows = numRows model, cols = numCols model }
         renderItem
         items
 
