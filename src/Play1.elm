@@ -68,7 +68,7 @@ initEmptyVals n =
     Grid.fold2d
         { rows = n, cols = n }
         --(\( x, y ) result -> rVal x y (10 * noise (toFloat x) (toFloat y)) :: result)
-        (\( x, y ) result -> rVal x y (toFloat x) :: result)
+        (\( x, y ) result -> rVal x y (10 * noise (toFloat x) (toFloat y)) :: result)
         []
 
 
@@ -137,7 +137,7 @@ delta_h =
 
 delta_t : Float
 delta_t =
-    0.05
+    0.02
 
 
 delta_u : Float
@@ -155,23 +155,19 @@ view model =
     Canvas.toHtml
         ( w, h )
         []
-        [ shapes
-            [ fill (Color.hsla 1 1 1 1) ]
-            (drawPiece
-                []
-                model
-            )
-        ]
+        (drawItAll
+            model
+        )
 
 
-drawPiece : List Renderable -> Model -> List Shape
-drawPiece items model =
-    List.map drawPieceItem model.uVals
+drawItAll : Model -> List Renderable
+drawItAll model =
+    List.map drawPieceItem model.vVals
 
 
-drawPieceItem : ReactionValue -> Shape
+drawPieceItem : ReactionValue -> Renderable
 drawPieceItem r =
-    circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (gridSize / 2)
+    shapes [ fill (Color.hsla r.value 0.5 0.5 1) ] [ circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (gridSize / 2) ]
 
 
 iterateModel : Model -> Model
