@@ -63,25 +63,14 @@ rVal =
 
 initEmptyVals : Int -> List ReactionValue
 initEmptyVals n =
-    let
-        zero =
-            toFloat 0
-    in
     Grid.fold2d
         { rows = n, cols = n }
-        (\( x, y ) result -> rVal x y zero :: result)
+        (\( x, y ) result -> rVal x y 0 :: result)
         []
 
 
 init : ( Model, Cmd Msg )
 init =
-    let
-        e =
-            initEmptyVals gridSize
-
-        f =
-            initEmptyVals gridSize
-    in
     ( { seed = Random.initialSeed (floor (42 * 10000))
       , count = 0
       , a = 1
@@ -90,8 +79,8 @@ init =
       , d = -1.5
       , h = 1
       , k = 1
-      , uVals = e
-      , vVals = f
+      , uVals = initEmptyVals gridSize
+      , vVals = initEmptyVals gridSize
       }
     , Cmd.none
     )
@@ -123,9 +112,14 @@ w =
     h
 
 
+maxIter : Int
+maxIter =
+    100
+
+
 gridSize : number
 gridSize =
-    100
+    40
 
 
 cellSize : Float
