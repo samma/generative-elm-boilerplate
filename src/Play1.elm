@@ -95,7 +95,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         AnimationFrame _ ->
-            if model.count < 50 then
+            if model.count < 10 then
                 ( { model | count = model.count + 1 }, Cmd.none )
 
             else
@@ -119,7 +119,7 @@ maxIter =
 
 gridSize : number
 gridSize =
-    50
+    100
 
 
 cellSize : Float
@@ -146,45 +146,32 @@ view model =
     Canvas.toHtml
         ( w, h )
         []
-        (shapes
+        ([ shapes
             [ fill Color.black ]
-            [ rect ( 0, 0 ) w h ]
-            :: artWork
+            artWork
+         ]
+         --:: artWork
         )
 
 
-drawPiece : List Renderable -> Model -> List Renderable
+indexToCoord : Int -> ( Int, Int )
+indexToCoord i =
+    ( modBy i gridSize, i // gridSize )
+
+
+coordToIndex : ( Int, Int ) -> Int
+coordToIndex ( x, y ) =
+    x + y * gridSize
+
+
+drawPiece : List Renderable -> Model -> List Shape
 drawPiece items model =
-    Grid.fold2d
-        { rows = gridSize, cols = gridSize }
-        renderItem
-        ( model, items )
-        |> Tuple.second
+    List.map drawPieceItem model.uVals
 
 
-renderItem : ( Int, Int ) -> ( Model, List Renderable ) -> ( Model, List Renderable )
-renderItem ( col, row ) ( model, items ) =
-    let
-        ( colf, rowf ) =
-            ( toFloat col, toFloat row )
-
-        ( x, y ) =
-            ( rowf * cellSize
-            , colf * cellSize
-            )
-
-        red =
-            noise x y
-
-        blue =
-            noise y x
-    in
-    ( model
-    , shapes
-        [ fill (Color.rgba red 0 blue 1) ]
-        [ circle ( x, y ) (cellSize / 1.75) ]
-        :: items
-    )
+drawPieceItem : ReactionValue -> Shape
+drawPieceItem r =
+    circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (cellSize / 2)
 
 
 
