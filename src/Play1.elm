@@ -68,7 +68,7 @@ initEmptyVals n =
     Grid.fold2d
         { rows = n, cols = n }
         --(\( x, y ) result -> rVal x y (10 * noise (toFloat x) (toFloat y)) :: result)
-        (\( x, y ) result -> rVal x y 0 :: result)
+        (\( x, y ) result -> rVal x y (toFloat x) :: result)
         []
 
 
@@ -117,12 +117,12 @@ w =
 
 maxIter : Int
 maxIter =
-    1000
+    10000
 
 
 gridSize : number
 gridSize =
-    20
+    30
 
 
 cellSize : Float
@@ -186,16 +186,24 @@ nextVals model =
             Maybe.withDefault (rVal x y 0) (get (coordToIndex ( x, y )) arr)
 
         getUp x y arr =
-            getCenter x (y - 1) arr
+            if y /= 1 then
+                getCenter x (modBy (y - 1) gridSize) arr
+
+            else
+                getCenter x 0 arr
 
         getDown x y arr =
-            getCenter x (y + 1) arr
+            getCenter x (modBy (y + 1) gridSize) arr
 
         getLeft x y arr =
-            getCenter (x - 1) y arr
+            if x /= 1 then
+                getCenter (modBy (x - 1) gridSize) y arr
+
+            else
+                getCenter 0 y arr
 
         getRight x y arr =
-            getCenter (x + 1) y arr
+            getCenter (modBy (x + 1) gridSize) y arr
 
         uLap x y =
             ((getRight x y uArr).value + (getLeft x y uArr).value + (getUp x y uArr).value + (getDown x y uArr).value - 4 * (getCenter x y uArr).value) / (delta_h ^ 2)
@@ -224,13 +232,13 @@ coordToIndex ( x, y ) =
 
 drawPiece : List Renderable -> Model -> List Shape
 drawPiece items model =
-    List.map drawPieceItem model.vVals
+    List.map drawPieceItem model.uVals
 
 
 drawPieceItem : ReactionValue -> Shape
 drawPieceItem r =
-    if r.value > 0.0 then
-        circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (10 * r.value)
+    if r.value > -20.0 then
+        circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (0 + abs r.value)
 
     else
         circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) 0
