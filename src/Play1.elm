@@ -65,11 +65,11 @@ cellSize =
     100
 
 
-x_n =
+numRows =
     10
 
 
-y_n =
+numCols =
     10
 
 
@@ -87,7 +87,7 @@ view model =
 
 drawPiece shapes =
     Grid.fold2d
-        { rows = x_n, cols = y_n }
+        { rows = numRows, cols = numCols }
         renderItem
         []
 
@@ -101,9 +101,12 @@ renderItem ( col, row ) lines =
             ( rowf * cellSize
             , colf * cellSize
             )
+
+        red =
+            noise (x + 1.0) (y + 1.0)
     in
     shapes
-        [ fill Color.black ]
+        [ fill (Color.rgba red 1 1 1) ]
         [ rect ( x, y ) cellSize cellSize ]
         :: lines
 
