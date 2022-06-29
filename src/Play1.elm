@@ -67,7 +67,8 @@ initEmptyVals : Int -> List ReactionValue
 initEmptyVals n =
     Grid.fold2d
         { rows = n, cols = n }
-        (\( x, y ) result -> rVal x y (noise (toFloat x) (toFloat y)) :: result)
+        --(\( x, y ) result -> rVal x y (10 * noise (toFloat x) (toFloat y)) :: result)
+        (\( x, y ) result -> rVal x y 0 :: result)
         []
 
 
@@ -97,7 +98,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         AnimationFrame _ ->
-            if model.count < 10 then
+            if model.count < maxIter then
                 ( iterateModel model, Cmd.none )
 
             else
@@ -116,12 +117,12 @@ w =
 
 maxIter : Int
 maxIter =
-    100
+    1000
 
 
 gridSize : number
 gridSize =
-    10
+    20
 
 
 cellSize : Float
@@ -136,7 +137,7 @@ delta_h =
 
 delta_t : Float
 delta_t =
-    0.02
+    0.05
 
 
 delta_u : Float
@@ -182,7 +183,7 @@ nextVals model =
             fromList model.vVals
 
         getCenter x y arr =
-            Maybe.withDefault (rVal x y 0.0) (get (coordToIndex ( x, y )) arr)
+            Maybe.withDefault (rVal x y 0) (get (coordToIndex ( x, y )) arr)
 
         getUp x y arr =
             getCenter x (y - 1) arr
@@ -223,12 +224,16 @@ coordToIndex ( x, y ) =
 
 drawPiece : List Renderable -> Model -> List Shape
 drawPiece items model =
-    List.map drawPieceItem model.uVals
+    List.map drawPieceItem model.vVals
 
 
 drawPieceItem : ReactionValue -> Shape
 drawPieceItem r =
-    circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (cellSize / 2)
+    if r.value > 0.0 then
+        circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (10 * r.value)
+
+    else
+        circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) 0
 
 
 
