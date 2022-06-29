@@ -2,6 +2,7 @@ module Play1 exposing (main)
 
 -- Trying to implement a reaction from Scientific_Computing_Simulations_and_Modeling
 
+import Array exposing (..)
 import Axis2d exposing (x)
 import Browser
 import Browser.Events exposing (onAnimationFrame)
@@ -167,9 +168,9 @@ iterateModel model =
     model
 
 
-nextVals : List ReactionValue -> List ReactionValue -> ( List ReactionValue, List ReactionValue )
-nextVals x y =
-    ( x, y )
+nextVals : List ReactionValue -> List ReactionValue -> ReactionValue
+nextVals uVals vVals =
+    get 0 (fromList uVals)
 
 
 indexToCoord : Int -> ( Int, Int )
