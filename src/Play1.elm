@@ -1,6 +1,9 @@
 module Play1 exposing (main)
 
 -- Trying to implement a reaction from Scientific_Computing_Simulations_and_Modeling
+-- TODO, merge uVals and vVals into one with x y u v
+-- Adjust colors to match the new data structure, use two channels
+-- Figure out good randomizations for the initial conditions
 
 import Array exposing (..)
 import Axis2d exposing (x)
@@ -68,7 +71,7 @@ initEmptyVals n =
     Grid.fold2d
         { rows = n, cols = n }
         --(\( x, y ) result -> rVal x y (10 * noise (toFloat x) (toFloat y)) :: result)
-        (\( x, y ) result -> rVal x y (10 * noise (toFloat x) (toFloat y)) :: result)
+        (\( x, y ) result -> rVal x y (2 * noise (toFloat x) (toFloat y)) :: result)
         []
 
 
@@ -122,7 +125,7 @@ maxIter =
 
 gridSize : number
 gridSize =
-    30
+    100
 
 
 cellSize : Float
@@ -167,7 +170,7 @@ drawItAll model =
 
 drawPieceItem : ReactionValue -> Renderable
 drawPieceItem r =
-    shapes [ fill (Color.hsla r.value 0.5 0.5 1) ] [ circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (gridSize / 2) ]
+    shapes [ fill (Color.hsla r.value 0.5 0.5 1) ] [ rect ( toFloat r.x * cellSize, toFloat r.y * cellSize ) cellSize cellSize ]
 
 
 iterateModel : Model -> Model
@@ -251,4 +254,4 @@ permTable =
 
 noise : Float -> Float -> Float
 noise =
-    Simplex.fractal2d { scale = 4.0, steps = 7, stepSize = 2.0, persistence = 2.0 } permTable
+    Simplex.fractal2d { scale = 0.1, steps = 7, stepSize = 2.0, persistence = 2.0 } permTable
