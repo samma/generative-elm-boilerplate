@@ -15,21 +15,6 @@ import Time exposing (Posix)
 
 
 
---Create a permutation table, using 42 as the seed
-
-
-permTable : PermutationTable
-permTable =
-    Simplex.permutationTableFromInt 42
-
-
-
--- Create a function for 2D fractal noise
-
-
-noise : Float -> Float -> Float
-noise =
-    Simplex.fractal2d { scale = 4.0, steps = 7, stepSize = 2.0, persistence = 2.0 } permTable
 
 
 main : Program Float Model ()
@@ -44,12 +29,12 @@ main =
 
 h : number
 h =
-    1200
+    1500
 
 
 w : number
 w =
-    1200
+    h
 
 
 padding : number
