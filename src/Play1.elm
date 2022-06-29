@@ -9,18 +9,20 @@ import Color exposing (Color)
 import Grid exposing (fold2d)
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Random
+import Random exposing (..)
 import Random.Extra exposing (result)
 import Simplex exposing (PermutationTable)
-import Task
 import Time exposing (Posix)
 
 
 type alias Model =
     { seed : Random.Seed
-    , heading : Float -- heading in radians
-    , speed : Float -- speed in pixels per second
+    , count : Int
     }
+
+
+type Msg
+    = AnimationFrame Posix
 
 
 
@@ -41,14 +43,26 @@ noise =
     Simplex.fractal2d { scale = 4.0, steps = 7, stepSize = 2.0, persistence = 2.0 } permTable
 
 
-main : Program Float Model ()
+main : Program Float Model Msg
 main =
     Browser.element
-        { init = \floatSeed -> ( { seed = Random.initialSeed (floor (floatSeed * 10000)), heading = 0.0, speed = 0.0 }, Cmd.none )
-        , update = \_ m -> ( m, Cmd.none )
-        , subscriptions = \_ -> Sub.none
+        { init = \floatSeed -> ( { seed = Random.initialSeed (floor (floatSeed * 10000)), count = 0 }, Cmd.none )
+        , update = update
+        , subscriptions = subscriptions
         , view = view
         }
+
+
+subscriptions : Model -> Sub Msg
+subscriptions _ =
+    onAnimationFrame AnimationFrame
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        AnimationFrame _ ->
+            ( { model | count = model.count + 1 }, Cmd.none )
 
 
 h : number
@@ -61,23 +75,26 @@ w =
     h
 
 
+cellSize : Float
 cellSize =
     h / numRows
 
 
+numRows : number
 numRows =
-    200
+    50
 
 
+numCols : number
 numCols =
     numRows
 
 
-view : Model -> Html ()
+view : Model -> Html Msg
 view model =
     let
         artWork =
-            drawPiece []
+            drawPiece [] model
     in
     Canvas.toHtml
         ( w, h )
@@ -85,13 +102,15 @@ view model =
         artWork
 
 
-drawPiece shapes =
+drawPiece : List Renderable -> Model -> List Renderable
+drawPiece shapes model =
     Grid.fold2d
-        { rows = numRows, cols = numCols }
+        { rows = model.count, cols = numCols }
         renderItem
-        []
+        shapes
 
 
+renderItem : ( Int, Int ) -> List Renderable -> List Renderable
 renderItem ( col, row ) lines =
     let
         ( colf, rowf ) =
@@ -110,17 +129,5 @@ renderItem ( col, row ) lines =
     in
     shapes
         [ fill (Color.rgba red 0 blue 1) ]
-        [ rect ( x, y ) cellSize cellSize ]
+        [ circle ( x, y ) (cellSize / 1.75) ]
         :: lines
-
-
-
-{-
-   [(0,0),(1,0),(2,0),(0,1),(1,1),(2,1)]
--}
---permTable : PermutationTable
---permTable =
---    Simplex.permutationTableFromInt 42
---noise : Float -> Float -> Float
---noise =
---    Simplex.fractal2d { scale = 4.0, steps = 7, stepSize = 2.0, persistence = 2.0 } permTable
