@@ -156,12 +156,22 @@ view model =
         ( w, h )
         []
         [ shapes
-            []
+            [ fill (Color.hsla 1 1 1 1) ]
             (drawPiece
                 []
                 model
             )
         ]
+
+
+drawPiece : List Renderable -> Model -> List Shape
+drawPiece items model =
+    List.map drawPieceItem model.uVals
+
+
+drawPieceItem : ReactionValue -> Shape
+drawPieceItem r =
+    circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (gridSize / 2)
 
 
 iterateModel : Model -> Model
@@ -228,20 +238,6 @@ indexToCoord i =
 coordToIndex : ( Int, Int ) -> Int
 coordToIndex ( x, y ) =
     x + y * gridSize
-
-
-drawPiece : List Renderable -> Model -> List Shape
-drawPiece items model =
-    List.map drawPieceItem model.uVals
-
-
-drawPieceItem : ReactionValue -> Shape
-drawPieceItem r =
-    if r.value > -20.0 then
-        circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (0 + abs r.value)
-
-    else
-        circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) 0
 
 
 
