@@ -98,7 +98,7 @@ update msg model =
     case msg of
         AnimationFrame _ ->
             if model.count < 10 then
-                ( { model | count = model.count + 1 }, Cmd.none )
+                ( iterateModel model, Cmd.none )
 
             else
                 ( model, Cmd.none )
@@ -165,17 +165,21 @@ view model =
 
 iterateModel : Model -> Model
 iterateModel model =
-    model
+    let
+        newMod =
+            nextVals model
+    in
+    { model | uVals = Tuple.first newMod, vVals = Tuple.second newMod, count = model.count + 1 }
 
 
-nextVals : List ReactionValue -> List ReactionValue -> Model -> ( List ReactionValue, List ReactionValue )
-nextVals uVals vVals model =
+nextVals : Model -> ( List ReactionValue, List ReactionValue )
+nextVals model =
     let
         uArr =
-            fromList uVals
+            fromList model.uVals
 
         vArr =
-            fromList vVals
+            fromList model.vVals
 
         getCenter x y arr =
             Maybe.withDefault (rVal x y 0.0) (get (coordToIndex ( x, y )) arr)
@@ -198,13 +202,13 @@ nextVals uVals vVals model =
         vLap x y =
             ((getRight x y vArr).value + (getLeft x y vArr).value + (getUp x y vArr).value + (getDown x y vArr).value - 4 * (getCenter x y vArr).value) / (delta_h ^ 2)
 
-        next_u x y =
-            (getCenter x y uArr).value + ((model.a * ((getCenter x y uArr).value - model.h)) + (model.b * (getCenter x y vArr).value - model.k) + delta_u * uLap x y) * delta_t
+        next_u r =
+            rVal r.x r.y ((getCenter r.x r.y uArr).value + ((model.a * ((getCenter r.x r.y uArr).value - model.h)) + (model.b * (getCenter r.x r.y vArr).value - model.k) + delta_u * uLap r.x r.y) * delta_t)
 
-        next_v x y =
-            (getCenter x y vArr).value + ((model.c * ((getCenter x y uArr).value - model.h)) + (model.d * (getCenter x y vArr).value - model.k) + delta_v * vLap x y) * delta_t
+        next_v r =
+            rVal r.x r.y ((getCenter r.x r.y vArr).value + ((model.c * ((getCenter r.x r.y uArr).value - model.h)) + (model.d * (getCenter r.x r.y vArr).value - model.k) + delta_v * vLap r.x r.y) * delta_t)
     in
-    ( uVals, vVals )
+    ( List.map next_u model.uVals, List.map next_v model.vVals )
 
 
 indexToCoord : Int -> ( Int, Int )
