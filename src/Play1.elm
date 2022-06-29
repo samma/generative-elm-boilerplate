@@ -2,6 +2,7 @@ module Play1 exposing (main)
 
 -- Trying to implement a reaction from Scientific_Computing_Simulations_and_Modeling
 
+import Axis2d exposing (x)
 import Browser
 import Browser.Events exposing (onAnimationFrame)
 import Canvas exposing (..)
@@ -65,7 +66,7 @@ initEmptyVals : Int -> List ReactionValue
 initEmptyVals n =
     Grid.fold2d
         { rows = n, cols = n }
-        (\( x, y ) result -> rVal x y 0 :: result)
+        (\( x, y ) result -> rVal x y (noise (toFloat x) (toFloat y)) :: result)
         []
 
 
@@ -119,7 +120,7 @@ maxIter =
 
 gridSize : number
 gridSize =
-    100
+    10
 
 
 cellSize : Float
@@ -137,21 +138,38 @@ delta_t =
     0.02
 
 
+delta_u : Float
+delta_u =
+    0.0001
+
+
+delta_v : Float
+delta_v =
+    0.0006
+
+
 view : Model -> Html Msg
 view model =
-    let
-        artWork =
-            drawPiece [] model
-    in
     Canvas.toHtml
         ( w, h )
         []
-        ([ shapes
-            [ fill Color.black ]
-            artWork
-         ]
-         --:: artWork
-        )
+        [ shapes
+            []
+            (drawPiece
+                []
+                model
+            )
+        ]
+
+
+iterateModel : Model -> Model
+iterateModel model =
+    model
+
+
+nextVals : List ReactionValue -> List ReactionValue -> ( List ReactionValue, List ReactionValue )
+nextVals x y =
+    ( x, y )
 
 
 indexToCoord : Int -> ( Int, Int )
