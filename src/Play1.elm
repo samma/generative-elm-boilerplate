@@ -53,7 +53,7 @@ main =
 
 h : number
 h =
-    1500
+    1200
 
 
 w : number
@@ -62,27 +62,27 @@ w =
 
 
 cellSize =
-    100
+    h / numRows
 
 
 numRows =
-    10
+    200
 
 
 numCols =
-    10
+    numRows
 
 
 view : Model -> Html ()
 view model =
     let
-        shapes =
+        artWork =
             drawPiece []
     in
     Canvas.toHtml
         ( w, h )
         []
-        shapes
+        artWork
 
 
 drawPiece shapes =
@@ -103,10 +103,13 @@ renderItem ( col, row ) lines =
             )
 
         red =
-            noise (x + 1.0) (y + 1.0)
+            noise x y
+
+        blue =
+            noise y x
     in
     shapes
-        [ fill (Color.rgba red 1 1 1) ]
+        [ fill (Color.rgba red 0 blue 1) ]
         [ rect ( x, y ) cellSize cellSize ]
         :: lines
 
