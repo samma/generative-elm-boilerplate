@@ -168,9 +168,31 @@ iterateModel model =
     model
 
 
-nextVals : List ReactionValue -> List ReactionValue -> ReactionValue
+nextVals : List ReactionValue -> List ReactionValue -> ( List ReactionValue, List ReactionValue )
 nextVals uVals vVals =
-    get 0 (fromList uVals)
+    let
+        uArr =
+            fromList uVals
+
+        vArr =
+            fromList vVals
+
+        fetchCenter x y arr =
+            Maybe.withDefault (rVal x y 0.0) (get (coordToIndex ( x, y )) arr)
+
+        getUp x y arr =
+            fetchCenter x (y - 1) arr
+
+        getDown x y arr =
+            fetchCenter x (y + 1) arr
+
+        getLeft x y arr =
+            fetchCenter (x - 1) y arr
+
+        getRight x y arr =
+            fetchCenter (x + 1) y arr
+    in
+    ( uVals, vVals )
 
 
 indexToCoord : Int -> ( Int, Int )
