@@ -17,7 +17,7 @@ import Time exposing (Posix)
 
 type alias Model =
     { seed : Random.Seed
-    , count : Int
+    , count : Float
     }
 
 
@@ -103,15 +103,15 @@ view model =
 
 
 drawPiece : List Renderable -> Model -> List Renderable
-drawPiece shapes model =
+drawPiece items model =
     Grid.fold2d
-        { rows = model.count, cols = numCols }
+        { rows = numRows, cols = numCols }
         renderItem
-        shapes
+        items
 
 
 renderItem : ( Int, Int ) -> List Renderable -> List Renderable
-renderItem ( col, row ) lines =
+renderItem ( col, row ) items =
     let
         ( colf, rowf ) =
             ( toFloat col, toFloat row )
@@ -130,4 +130,4 @@ renderItem ( col, row ) lines =
     shapes
         [ fill (Color.rgba red 0 blue 1) ]
         [ circle ( x, y ) (cellSize / 1.75) ]
-        :: lines
+        :: items
