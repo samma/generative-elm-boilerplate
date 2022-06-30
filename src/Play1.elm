@@ -121,7 +121,7 @@ update msg model =
     case msg of
         AnimationFrame _ ->
             if model.count < maxIter then
-                ( iterateModel model, Cmd.none )
+                ( iterateModel model |> iterateModel |> iterateModel |> iterateModel |> iterateModel, Cmd.none )
 
             else
                 ( model, Cmd.none )
@@ -232,24 +232,32 @@ nextVals model =
             Maybe.withDefault (rVal x y 0 0) (get (coordToIndex ( x, y )) arr)
 
         getUp x y arr =
-            if y /= 1 then
-                getCenter x (modBy (y - 1) gridSize) arr
+            if y /= 0 then
+                getCenter x (y - 1) arr
 
             else
                 getCenter x 0 arr
 
         getDown x y arr =
-            getCenter x (modBy (y + 1) gridSize) arr
+            if y /= gridSize - 1 then
+                getCenter x (y + 1) arr
+
+            else
+                getCenter x (y - 1) arr
 
         getLeft x y arr =
-            if x /= 1 then
-                getCenter (modBy (x - 1) gridSize) y arr
+            if x /= 0 then
+                getCenter (x - 1) y arr
 
             else
                 getCenter 0 y arr
 
         getRight x y arr =
-            getCenter (modBy (x + 1) gridSize) y arr
+            if x /= gridSize - 1 then
+                getCenter (x + 1) y arr
+
+            else
+                getCenter (x - 1) y arr
 
         uLap x y =
             ((getRight x y reactionArr).uValue + (getLeft x y reactionArr).uValue + (getUp x y reactionArr).uValue + (getDown x y reactionArr).uValue - 4 * (getCenter x y reactionArr).uValue) / (delta_h ^ 2)
