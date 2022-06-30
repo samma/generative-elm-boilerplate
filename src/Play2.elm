@@ -66,9 +66,9 @@ init : ( Model, Cmd Msg )
 init =
     ( { seed = Random.initialSeed (floor (42 * 10000))
       , count = 0
-      , e = 0.2
+      , e = 0.02
       , q = 0.001
-      , f = 1.0
+      , f = 0.0001
       , cells = initReactionValues gridSize
       , prevCells = initZeroReactionValues gridSize
       }
@@ -127,7 +127,7 @@ delta_h =
 
 delta_t : Float
 delta_t =
-    0.0002
+    0.00002
 
 
 diff_u : Float
@@ -244,8 +244,8 @@ nextVals model =
                     * uLap x y
                     * delta_t
                   )
+                / model.e
 
-        -- / model.e
         next_v x y =
             (getCenter x y reactionArr).uValue - (getCenter x y reactionArr).vValue + (diff_u * vLap x y * delta_t)
 
