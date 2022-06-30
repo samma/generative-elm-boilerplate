@@ -66,13 +66,23 @@ rVal =
         }
 
 
-initEmptyVals : Int -> List ReactionValue
-initEmptyVals n =
+initReactionValues : Int -> List ReactionValue
+initReactionValues n =
     Grid.fold2d
         { rows = n, cols = n }
-        --(\( x, y ) result -> rVal x y (10 * noise (toFloat x) (toFloat y)) :: result)
-        (\( x, y ) result -> rVal x y (2 * noise (toFloat x) (toFloat y)) :: result)
+        (\( x, y ) result -> rVal x y (0.1 * noise (toFloat x) (toFloat y)) :: result)
+        --(\( x, y ) result -> rVal x y (2 * noise (toFloat x) (toFloat y)) :: result)
         []
+
+
+seedCorner : ( Int, Int ) -> List ReactionValue -> List ReactionValue
+seedCorner =
+    \( x, y ) result ->
+        if x == 0 && y == 0 then
+            rVal x y 1 :: result
+
+        else
+            rVal x y 0 :: result
 
 
 init : ( Model, Cmd Msg )
@@ -85,8 +95,8 @@ init =
       , d = -1.5
       , h = 1
       , k = 1
-      , uVals = initEmptyVals gridSize
-      , vVals = initEmptyVals gridSize
+      , uVals = initReactionValues gridSize
+      , vVals = initReactionValues gridSize
       }
     , Cmd.none
     )
@@ -125,7 +135,7 @@ maxIter =
 
 gridSize : number
 gridSize =
-    30
+    70
 
 
 cellSize : Float
@@ -170,7 +180,20 @@ drawItAll model =
 
 drawPieceItem : ReactionValue -> Renderable
 drawPieceItem r =
-    shapes [ fill (Color.hsla (r.value + 3) 0.5 0.5 1) ] [ rect ( toFloat r.x * cellSize, toFloat r.y * cellSize ) cellSize cellSize ]
+    shapes [ fill (Color.hsla (0.3 + r.value / 3) 0.5 0.5 1) ] [ rect ( toFloat r.x * cellSize, toFloat r.y * cellSize ) cellSize cellSize ]
+
+
+clamp : Float -> Float -> Float -> Float
+clamp =
+    \x min max ->
+        if x < min then
+            min
+
+        else if x > max then
+            max
+
+        else
+            x
 
 
 iterateModel : Model -> Model
@@ -245,7 +268,7 @@ coordToIndex ( x, y ) =
 
 permTable : PermutationTable
 permTable =
-    Simplex.permutationTableFromInt 12
+    Simplex.permutationTableFromInt 8000
 
 
 
@@ -254,4 +277,4 @@ permTable =
 
 noise : Float -> Float -> Float
 noise =
-    Simplex.fractal2d { scale = 100, steps = 7, stepSize = 2.0, persistence = 2.0 } permTable
+    Simplex.fractal2d { scale = 3.0, steps = 7, stepSize = 2.0, persistence = 2.0 } permTable
