@@ -85,6 +85,34 @@ update msg model =
         AnimationFrame _ ->
             if model.count < maxIter then
                 ( iterateModel model
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
                 , Cmd.none
                 )
 
@@ -206,11 +234,63 @@ nextVals model =
         getRight x y arr =
             getCenter (x + 1) y arr
 
+        getDownRight x y arr =
+            getCenter (x + 1) (y + 1) arr
+
+        getDownLeft x y arr =
+            getCenter (x - 1) (y + 1) arr
+
+        getUpRight x y arr =
+            getCenter (x + 1) (y - 1) arr
+
+        getUpLeft x y arr =
+            getCenter (x - 1) (y - 1) arr
+
         uLap x y =
-            ((((getRight x y reactionArr).uValue + (getLeft x y reactionArr).uValue + (getUp x y reactionArr).uValue + (getDown x y reactionArr).uValue) / 4) - (getCenter x y reactionArr).uValue) / (delta_h ^ 2)
+            ((getRight x y reactionArr).uValue
+                * 0.5
+                + (getLeft x y reactionArr).uValue
+                * 0.5
+                + (getUp x y reactionArr).uValue
+                * 0.5
+                + (getDown x y reactionArr).uValue
+                * 0.5
+                + (getDownRight x y reactionArr).uValue
+                * 0.25
+                + (getDownLeft x y reactionArr).uValue
+                * 0.25
+                + (getUpRight x y reactionArr).uValue
+                * 0.25
+                + (getUpLeft x y reactionArr).uValue
+                * 0.25
+                - ((getCenter x y reactionArr).uValue
+                    * 3
+                  )
+            )
+                / (delta_h ^ 2)
 
         vLap x y =
-            ((((getRight x y reactionArr).vValue + (getLeft x y reactionArr).vValue + (getUp x y reactionArr).vValue + (getDown x y reactionArr).vValue) / 4) - (getCenter x y reactionArr).vValue) / (delta_h ^ 2)
+            ((getRight x y reactionArr).vValue
+                * 0.5
+                + (getLeft x y reactionArr).vValue
+                * 0.5
+                + (getUp x y reactionArr).vValue
+                * 0.5
+                + (getDown x y reactionArr).vValue
+                * 0.5
+                + (getDownRight x y reactionArr).vValue
+                * 0.25
+                + (getDownLeft x y reactionArr).vValue
+                * 0.25
+                + (getUpRight x y reactionArr).vValue
+                * 0.25
+                + (getUpLeft x y reactionArr).vValue
+                * 0.25
+                - ((getCenter x y reactionArr).vValue
+                    * 3
+                  )
+            )
+                / (delta_h ^ 2)
 
         next_u x y =
             ((model.f * (1 - (getCenter x y reactionArr).uValue))
@@ -285,10 +365,10 @@ seedMiddle x y =
             gridSize / 2
     in
     if toFloat x < (middle + thickness) && toFloat x > (middle - thickness) && toFloat y < (middle + thickness) && toFloat y > (middle - thickness) then
-        rVal x y 1 0.9
+        rVal x y 1 0
 
     else
-        rVal x y 0.1 1
+        rVal x y 0 1
 
 
 seedStick : Int -> Int -> ReactionValue
