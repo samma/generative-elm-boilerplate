@@ -245,7 +245,7 @@ coordToIndex ( x, y ) =
 
 permTable : PermutationTable
 permTable =
-    Simplex.permutationTableFromInt 42
+    Simplex.permutationTableFromInt 12
 
 
 
@@ -254,4 +254,4 @@ permTable =
 
 noise : Float -> Float -> Float
 noise =
-    Simplex.fractal2d { scale = 0.1, steps = 7, stepSize = 2.0, persistence = 2.0 } permTable
+    Simplex.fractal2d { scale = 100, steps = 7, stepSize = 2.0, persistence = 2.0 } permTable
