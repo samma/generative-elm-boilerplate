@@ -72,7 +72,7 @@ initReactionValues : Int -> List ReactionValue
 initReactionValues n =
     Grid.fold2d
         { rows = n, cols = n }
-        (\( x, y ) result -> rVal x y (1 + (0.03 * noise (toFloat x) (toFloat y))) (0.03 * noise (toFloat x) (toFloat y)) :: result)
+        (\( x, y ) result -> rVal x y (0.03 * noise (toFloat x) (toFloat y)) (0.03 * noise (toFloat x) (toFloat y)) :: result)
         []
 
 
@@ -121,7 +121,25 @@ update msg model =
     case msg of
         AnimationFrame _ ->
             if model.count < maxIter then
-                ( iterateModel model |> iterateModel |> iterateModel |> iterateModel |> iterateModel, Cmd.none )
+                ( iterateModel model
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                , Cmd.none
+                )
 
             else
                 ( model, Cmd.none )
@@ -197,7 +215,7 @@ scaleUvals x =
 
 drawPieceItem : ReactionValue -> Renderable
 drawPieceItem r =
-    shapes [ fill (Color.rgba (scaleUvals r.uValue) 0 0 1) ] [ rect ( toFloat r.x * cellSize, toFloat r.y * cellSize ) cellSize cellSize ]
+    shapes [ fill (Color.rgba (scaleUvals r.uValue) (scaleUvals r.vValue) 0 1) ] [ rect ( toFloat r.x * cellSize, toFloat r.y * cellSize ) cellSize cellSize ]
 
 
 clamp : Float -> Float -> Float -> Float
