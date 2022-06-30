@@ -125,7 +125,7 @@ maxIter =
 
 gridSize : number
 gridSize =
-    100
+    30
 
 
 cellSize : Float
@@ -249,7 +249,7 @@ permTable =
 
 
 
--- Create a function for 2D fractal noise
+-- Create a function for 2D noise
 
 
 noise : Float -> Float -> Float
