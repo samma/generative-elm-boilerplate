@@ -1,9 +1,6 @@
 module Play1 exposing (main)
 
--- Trying to implement a reaction from Scientific_Computing_Simulations_and_Modeling
--- TODO, merge uVals and vVals into one with x y u v
--- Adjust colors to match the new data structure, use two channels
--- Figure out good randomizations for the initial conditions
+-- Trying to implement Belousov-Zhabotinsky Reaction from Scientific_Computing_Simulations_and_Modeling
 
 import Array exposing (..)
 import Axis2d exposing (x)
@@ -36,26 +33,16 @@ type alias Model =
     }
 
 
+type Msg
+    = AnimationFrame Posix
+
+
 type alias ReactionValue =
     { x : Int
     , y : Int
     , uValue : Float
     , vValue : Float
     }
-
-
-type Msg
-    = AnimationFrame Posix
-
-
-main : Program Float Model Msg
-main =
-    Browser.element
-        { init = \floatSeed -> init
-        , update = update
-        , subscriptions = subscriptions
-        , view = view
-        }
 
 
 rVal : a -> b -> c -> d -> { x : a, y : b, uValue : c, vValue : d }
@@ -68,30 +55,14 @@ rVal =
         }
 
 
-initReactionValues : Int -> List ReactionValue
-initReactionValues n =
-    Grid.fold2d
-        { rows = n, cols = n }
-        (\( x, y ) result -> rVal x y (0.03 * noise (toFloat x) (toFloat y)) (0.03 * noise (toFloat x) (toFloat y)) :: result)
-        []
-
-
-initZeroReactionValues : Int -> List ReactionValue
-initZeroReactionValues n =
-    Grid.fold2d
-        { rows = n, cols = n }
-        (\( x, y ) result -> rVal x y 0 0 :: result)
-        []
-
-
-seedCorner : ( Int, Int ) -> List ReactionValue -> List ReactionValue
-seedCorner =
-    \( x, y ) result ->
-        if x == 0 && y == 0 then
-            rVal x y 1 0.7 :: result
-
-        else
-            rVal x y 0 0 :: result
+main : Program Float Model Msg
+main =
+    Browser.element
+        { init = \floatSeed -> init
+        , update = update
+        , subscriptions = subscriptions
+        , view = view
+        }
 
 
 init : ( Model, Cmd Msg )
@@ -172,7 +143,7 @@ w =
 
 maxIter : Int
 maxIter =
-    10000
+    1000000
 
 
 gridSize : number
@@ -314,6 +285,32 @@ indexToCoord i =
 coordToIndex : ( Int, Int ) -> Int
 coordToIndex ( x, y ) =
     x + y * gridSize
+
+
+initReactionValues : Int -> List ReactionValue
+initReactionValues n =
+    Grid.fold2d
+        { rows = n, cols = n }
+        (\( x, y ) result -> rVal x y (0.03 * noise (toFloat x) (toFloat y)) (0.03 * noise (toFloat x) (toFloat y)) :: result)
+        []
+
+
+initZeroReactionValues : Int -> List ReactionValue
+initZeroReactionValues n =
+    Grid.fold2d
+        { rows = n, cols = n }
+        (\( x, y ) result -> rVal x y 0 0 :: result)
+        []
+
+
+seedCorner : ( Int, Int ) -> List ReactionValue -> List ReactionValue
+seedCorner =
+    \( x, y ) result ->
+        if x == 0 && y == 0 then
+            rVal x y 1 0.7 :: result
+
+        else
+            rVal x y 0 0 :: result
 
 
 
