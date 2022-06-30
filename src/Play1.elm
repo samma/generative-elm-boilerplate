@@ -138,6 +138,21 @@ update msg model =
                     |> iterateModel
                     |> iterateModel
                     |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
                 , Cmd.none
                 )
 
@@ -215,7 +230,7 @@ scaleUvals x =
 
 drawPieceItem : ReactionValue -> Renderable
 drawPieceItem r =
-    shapes [ fill (Color.rgba (scaleUvals r.uValue) (scaleUvals r.vValue) 0 1) ] [ rect ( toFloat r.x * cellSize, toFloat r.y * cellSize ) cellSize cellSize ]
+    shapes [ fill (Color.hsla (scaleUvals r.uValue) 0.5 0.5 1) ] [ rect ( toFloat r.x * cellSize, toFloat r.y * cellSize ) cellSize cellSize ]
 
 
 clamp : Float -> Float -> Float -> Float
