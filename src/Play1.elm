@@ -70,7 +70,7 @@ initReactionValues : Int -> List ReactionValue
 initReactionValues n =
     Grid.fold2d
         { rows = n, cols = n }
-        (\( x, y ) result -> rVal x y (0.1 * noise (toFloat x) (toFloat y)) :: result)
+        (\( x, y ) result -> rVal x y (0.03 * noise (toFloat x) (toFloat y)) :: result)
         --(\( x, y ) result -> rVal x y (2 * noise (toFloat x) (toFloat y)) :: result)
         []
 
@@ -145,7 +145,7 @@ cellSize =
 
 delta_h : Float
 delta_h =
-    1.0 / gridSize
+    1.0
 
 
 delta_t : Float
@@ -160,7 +160,7 @@ delta_u =
 
 delta_v : Float
 delta_v =
-    0.0006
+    0.0
 
 
 view : Model -> Html Msg
@@ -180,7 +180,7 @@ drawItAll model =
 
 drawPieceItem : ReactionValue -> Renderable
 drawPieceItem r =
-    shapes [ fill (Color.hsla (0.3 + r.value / 3) 0.5 0.5 1) ] [ rect ( toFloat r.x * cellSize, toFloat r.y * cellSize ) cellSize cellSize ]
+    shapes [ fill (Color.hsla (sin r.value / 10) 0.5 0.5 1) ] [ rect ( toFloat r.x * cellSize, toFloat r.y * cellSize ) cellSize cellSize ]
 
 
 clamp : Float -> Float -> Float -> Float
