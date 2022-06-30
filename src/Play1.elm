@@ -31,15 +31,16 @@ type alias Model =
     , d : Float
     , h : Float
     , k : Float
-    , uVals : List ReactionValue
-    , vVals : List ReactionValue
+    , cells : List ReactionValue
+    , prevCells : List ReactionValue
     }
 
 
 type alias ReactionValue =
     { x : Int
     , y : Int
-    , value : Float
+    , uValue : Float
+    , vValue : Float
     }
 
 
@@ -57,12 +58,13 @@ main =
         }
 
 
-rVal : Int -> Int -> Float -> ReactionValue
+rVal : a -> b -> c -> d -> { x : a, y : b, uValue : c, vValue : d }
 rVal =
-    \x y v ->
+    \x y v u ->
         { x = x
         , y = y
-        , value = v
+        , uValue = v
+        , vValue = u
         }
 
 
@@ -70,8 +72,15 @@ initReactionValues : Int -> List ReactionValue
 initReactionValues n =
     Grid.fold2d
         { rows = n, cols = n }
-        (\( x, y ) result -> rVal x y (0.03 * noise (toFloat x) (toFloat y)) :: result)
-        --(\( x, y ) result -> rVal x y (2 * noise (toFloat x) (toFloat y)) :: result)
+        (\( x, y ) result -> rVal x y (1 + (0.03 * noise (toFloat x) (toFloat y))) (0.03 * noise (toFloat x) (toFloat y)) :: result)
+        []
+
+
+initZeroReactionValues : Int -> List ReactionValue
+initZeroReactionValues n =
+    Grid.fold2d
+        { rows = n, cols = n }
+        (\( x, y ) result -> rVal x y 0 0 :: result)
         []
 
 
@@ -79,10 +88,10 @@ seedCorner : ( Int, Int ) -> List ReactionValue -> List ReactionValue
 seedCorner =
     \( x, y ) result ->
         if x == 0 && y == 0 then
-            rVal x y 1 :: result
+            rVal x y 1 0.7 :: result
 
         else
-            rVal x y 0 :: result
+            rVal x y 0 0 :: result
 
 
 init : ( Model, Cmd Msg )
@@ -95,8 +104,8 @@ init =
       , d = -1.5
       , h = 1
       , k = 1
-      , uVals = initReactionValues gridSize
-      , vVals = initReactionValues gridSize
+      , cells = initReactionValues gridSize
+      , prevCells = initZeroReactionValues gridSize
       }
     , Cmd.none
     )
@@ -135,7 +144,7 @@ maxIter =
 
 gridSize : number
 gridSize =
-    70
+    50
 
 
 cellSize : Float
@@ -145,7 +154,7 @@ cellSize =
 
 delta_h : Float
 delta_h =
-    1.0
+    1.0 / gridSize
 
 
 delta_t : Float
@@ -153,14 +162,14 @@ delta_t =
     0.02
 
 
-delta_u : Float
-delta_u =
+diff_u : Float
+diff_u =
     0.0001
 
 
-delta_v : Float
-delta_v =
-    0.0
+diff_v : Float
+diff_v =
+    0.0006
 
 
 view : Model -> Html Msg
@@ -175,12 +184,20 @@ view model =
 
 drawItAll : Model -> List Renderable
 drawItAll model =
-    List.map drawPieceItem model.vVals
+    List.map drawPieceItem model.cells
+
+
+scaleVvals x =
+    0.5 + (x / 10)
+
+
+scaleUvals x =
+    0.5 + (x / 10)
 
 
 drawPieceItem : ReactionValue -> Renderable
 drawPieceItem r =
-    shapes [ fill (Color.hsla (sin r.value / 10) 0.5 0.5 1) ] [ rect ( toFloat r.x * cellSize, toFloat r.y * cellSize ) cellSize cellSize ]
+    shapes [ fill (Color.rgba (scaleUvals r.uValue) 0 0 1) ] [ rect ( toFloat r.x * cellSize, toFloat r.y * cellSize ) cellSize cellSize ]
 
 
 clamp : Float -> Float -> Float -> Float
@@ -199,23 +216,20 @@ clamp =
 iterateModel : Model -> Model
 iterateModel model =
     let
-        newMod =
+        nextCells =
             nextVals model
     in
-    { model | uVals = Tuple.first newMod, vVals = Tuple.second newMod, count = model.count + 1 }
+    { model | prevCells = model.cells, cells = nextCells, count = model.count + 1 }
 
 
-nextVals : Model -> ( List ReactionValue, List ReactionValue )
+nextVals : Model -> List ReactionValue
 nextVals model =
     let
-        uArr =
-            fromList model.uVals
-
-        vArr =
-            fromList model.vVals
+        reactionArr =
+            fromList model.cells
 
         getCenter x y arr =
-            Maybe.withDefault (rVal x y 0) (get (coordToIndex ( x, y )) arr)
+            Maybe.withDefault (rVal x y 0 0) (get (coordToIndex ( x, y )) arr)
 
         getUp x y arr =
             if y /= 1 then
@@ -238,18 +252,21 @@ nextVals model =
             getCenter (modBy (x + 1) gridSize) y arr
 
         uLap x y =
-            ((getRight x y uArr).value + (getLeft x y uArr).value + (getUp x y uArr).value + (getDown x y uArr).value - 4 * (getCenter x y uArr).value) / (delta_h ^ 2)
+            ((getRight x y reactionArr).uValue + (getLeft x y reactionArr).uValue + (getUp x y reactionArr).uValue + (getDown x y reactionArr).uValue - 4 * (getCenter x y reactionArr).uValue) / (delta_h ^ 2)
 
         vLap x y =
-            ((getRight x y vArr).value + (getLeft x y vArr).value + (getUp x y vArr).value + (getDown x y vArr).value - 4 * (getCenter x y vArr).value) / (delta_h ^ 2)
+            ((getRight x y reactionArr).vValue + (getLeft x y reactionArr).vValue + (getUp x y reactionArr).vValue + (getDown x y reactionArr).vValue - 4 * (getCenter x y reactionArr).vValue) / (delta_h ^ 2)
 
-        next_u r =
-            rVal r.x r.y ((getCenter r.x r.y uArr).value + ((model.a * ((getCenter r.x r.y uArr).value - model.h)) + (model.b * (getCenter r.x r.y vArr).value - model.k) + delta_u * uLap r.x r.y) * delta_t)
+        next_u x y =
+            (getCenter x y reactionArr).uValue + ((model.a * ((getCenter x y reactionArr).uValue - model.h)) + (model.b * (getCenter x y reactionArr).vValue - model.k) + diff_u * uLap x y) * delta_t
 
-        next_v r =
-            rVal r.x r.y ((getCenter r.x r.y vArr).value + ((model.c * ((getCenter r.x r.y uArr).value - model.h)) + (model.d * (getCenter r.x r.y vArr).value - model.k) + delta_v * vLap r.x r.y) * delta_t)
+        next_v x y =
+            (getCenter x y reactionArr).vValue + ((model.c * ((getCenter x y reactionArr).uValue - model.h)) + (model.d * (getCenter x y reactionArr).vValue - model.k) + diff_v * vLap x y) * delta_t
+
+        nextVal r =
+            rVal r.x r.y (next_u r.x r.y) (next_v r.x r.y)
     in
-    ( List.map next_u model.uVals, List.map next_v model.vVals )
+    List.map nextVal model.cells
 
 
 indexToCoord : Int -> ( Int, Int )
@@ -277,4 +294,4 @@ permTable =
 
 noise : Float -> Float -> Float
 noise =
-    Simplex.fractal2d { scale = 3.0, steps = 7, stepSize = 2.0, persistence = 2.0 } permTable
+    Simplex.fractal2d { scale = 1.0, steps = 7, stepSize = 2.0, persistence = 2.0 } permTable
