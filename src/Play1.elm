@@ -220,17 +220,13 @@ drawItAll model =
     List.map drawPieceItem model.cells
 
 
-scaleVvals x =
-    0.5 + (x / 10)
-
-
-scaleUvals x =
-    0.5 + (x / 10)
+scaleReactionValsToColor x =
+    clamp (0.5 + (x / 10)) 0 1
 
 
 drawPieceItem : ReactionValue -> Renderable
 drawPieceItem r =
-    shapes [ fill (Color.hsla (scaleUvals r.uValue) 0.5 0.5 1) ] [ rect ( toFloat r.x * cellSize, toFloat r.y * cellSize ) cellSize cellSize ]
+    shapes [ fill (Color.hsla 0.5 (scaleReactionValsToColor r.uValue) 0.5 1) ] [ rect ( toFloat r.x * cellSize, toFloat r.y * cellSize ) cellSize cellSize ]
 
 
 clamp : Float -> Float -> Float -> Float
@@ -326,7 +322,7 @@ coordToIndex ( x, y ) =
 
 permTable : PermutationTable
 permTable =
-    Simplex.permutationTableFromInt 8000
+    Simplex.permutationTableFromInt 43
 
 
 
@@ -335,4 +331,4 @@ permTable =
 
 noise : Float -> Float -> Float
 noise =
-    Simplex.fractal2d { scale = 0.1, steps = 7, stepSize = 2.0, persistence = 2.0 } permTable
+    Simplex.fractal2d { scale = 1, steps = 4, stepSize = 3.0, persistence = 2.0 } permTable
