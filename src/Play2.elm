@@ -1,4 +1,4 @@
-module Play1 exposing (main)
+module Play2 exposing (main)
 
 -- Trying to implement Belousov-Zhabotinsky Reaction from Scientific_Computing_Simulations_and_Modeling
 
@@ -22,12 +22,9 @@ import Time exposing (Posix)
 type alias Model =
     { seed : Random.Seed
     , count : Int
-    , a : Float
-    , b : Float
-    , c : Float
-    , d : Float
-    , h : Float
-    , k : Float
+    , e : Float
+    , q : Float
+    , f : Float
     , cells : List ReactionValue
     , prevCells : List ReactionValue
     }
@@ -69,12 +66,9 @@ init : ( Model, Cmd Msg )
 init =
     ( { seed = Random.initialSeed (floor (42 * 10000))
       , count = 0
-      , a = 1
-      , b = -1
-      , c = 2
-      , d = -1.5
-      , h = 1
-      , k = 1
+      , e = 0.2
+      , q = 0.001
+      , f = 1.0
       , cells = initReactionValues gridSize
       , prevCells = initZeroReactionValues gridSize
       }
@@ -93,36 +87,6 @@ update msg model =
         AnimationFrame _ ->
             if model.count < maxIter then
                 ( iterateModel model
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
                     |> iterateModel
                 , Cmd.none
                 )
@@ -148,7 +112,7 @@ maxIter =
 
 gridSize : number
 gridSize =
-    50
+    90
 
 
 cellSize : Float
@@ -163,17 +127,17 @@ delta_h =
 
 delta_t : Float
 delta_t =
-    0.02
+    0.0002
 
 
 diff_u : Float
 diff_u =
-    0.0001
+    0.00001
 
 
 diff_v : Float
 diff_v =
-    0.0006
+    0.00001
 
 
 view : Model -> Html Msg
@@ -194,7 +158,7 @@ drawItAll model =
 drawPieceItem : ReactionValue -> Renderable
 drawPieceItem r =
     shapes
-        [ fill (Color.hsla 0.5 (scaleReactionValsToColor r.uValue) 0.5 1) ]
+        [ fill (Color.hsla 0.5 (scaleReactionValsToColor r.vValue) 0.5 1) ]
         [ rect ( toFloat r.x * cellSize, toFloat r.y * cellSize ) cellSize cellSize ]
 
 
@@ -262,16 +226,28 @@ nextVals model =
                 getCenter (x - 1) y arr
 
         uLap x y =
-            ((getRight x y reactionArr).uValue + (getLeft x y reactionArr).uValue + (getUp x y reactionArr).uValue + (getDown x y reactionArr).uValue - 4 * (getCenter x y reactionArr).uValue) / (delta_h ^ 2)
+            ((getRight x y reactionArr).uValue + (getLeft x y reactionArr).uValue + (getUp x y reactionArr).uValue + (getDown x y reactionArr).uValue - (4 * (getCenter x y reactionArr).uValue)) / (delta_h ^ 2)
 
         vLap x y =
-            ((getRight x y reactionArr).vValue + (getLeft x y reactionArr).vValue + (getUp x y reactionArr).vValue + (getDown x y reactionArr).vValue - 4 * (getCenter x y reactionArr).vValue) / (delta_h ^ 2)
+            ((getRight x y reactionArr).vValue + (getLeft x y reactionArr).vValue + (getUp x y reactionArr).vValue + (getDown x y reactionArr).vValue - (4 * (getCenter x y reactionArr).vValue)) / (delta_h ^ 2)
 
         next_u x y =
-            (getCenter x y reactionArr).uValue + ((model.a * ((getCenter x y reactionArr).uValue - model.h)) + (model.b * (getCenter x y reactionArr).vValue - model.k) + diff_u * uLap x y) * delta_t
+            ((getCenter x y reactionArr).uValue
+                * (1 - (getCenter x y reactionArr).uValue)
+            )
+                - (((getCenter x y reactionArr).uValue - model.q)
+                    / ((getCenter x y reactionArr).uValue + model.q)
+                    * model.f
+                    * (getCenter x y reactionArr).vValue
+                  )
+                + (diff_u
+                    * uLap x y
+                    * delta_t
+                  )
 
+        -- / model.e
         next_v x y =
-            (getCenter x y reactionArr).vValue + ((model.c * ((getCenter x y reactionArr).uValue - model.h)) + (model.d * (getCenter x y reactionArr).vValue - model.k) + diff_v * vLap x y) * delta_t
+            (getCenter x y reactionArr).uValue - (getCenter x y reactionArr).vValue + (diff_u * vLap x y * delta_t)
 
         nextVal r =
             rVal r.x r.y (next_u r.x r.y) (next_v r.x r.y)
@@ -293,8 +269,38 @@ initReactionValues : Int -> List ReactionValue
 initReactionValues n =
     Grid.fold2d
         { rows = n, cols = n }
-        (\( x, y ) result -> rVal x y (0.03 * noise (toFloat x) (toFloat y)) (0.03 * noise (toFloat x) (toFloat y)) :: result)
+        (\( x, y ) result -> noiseSeeding x y :: result)
         []
+
+
+noiseSeeding : Int -> Int -> ReactionValue
+noiseSeeding x y =
+    rVal x y (2 * noise (toFloat x) (toFloat y)) (3 * noise (toFloat x) (toFloat y))
+
+
+seedCorner : Int -> Int -> ReactionValue
+seedCorner x y =
+    if x < 10 && y < 10 then
+        rVal x y 10 7.5
+
+    else
+        rVal x y 0.1 0.02
+
+
+seedStick : Int -> Int -> ReactionValue
+seedStick x y =
+    let
+        thickness =
+            10.0
+
+        middle =
+            gridSize / 2
+    in
+    if toFloat x < (middle + thickness + (3 / toFloat y)) && toFloat x > (middle - thickness) && toFloat y < (middle + thickness) then
+        rVal x y 0.61 0.5
+
+    else
+        rVal x y 0.01 0.05
 
 
 initZeroReactionValues : Int -> List ReactionValue
@@ -303,16 +309,6 @@ initZeroReactionValues n =
         { rows = n, cols = n }
         (\( x, y ) result -> rVal x y 0 0 :: result)
         []
-
-
-seedCorner : ( Int, Int ) -> List ReactionValue -> List ReactionValue
-seedCorner =
-    \( x, y ) result ->
-        if x == 0 && y == 0 then
-            rVal x y 10 7.5 :: result
-
-        else
-            rVal x y 1 1 :: result
 
 
 
