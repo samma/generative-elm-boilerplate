@@ -66,10 +66,22 @@ init =
       , count = 0
       , f = 0.055
       , k = 0.062
-      , cells = initReactionValues gridSize
+      , cells = List.sortWith sortCells (initReactionValues gridSize)
       }
     , Cmd.none
     )
+
+
+sortCells a b =
+    case compare (coordToIndex ( a.x, a.y )) (coordToIndex ( b.x, b.y )) of
+        EQ ->
+            EQ
+
+        GT ->
+            GT
+
+        LT ->
+            LT
 
 
 subscriptions : Model -> Sub Msg
@@ -83,6 +95,37 @@ update msg model =
         AnimationFrame _ ->
             if model.count < maxIter then
                 ( iterateModel model
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
                     |> iterateModel
                 , Cmd.none
                 )
@@ -282,7 +325,7 @@ seedMiddle : Int -> Int -> ReactionValue
 seedMiddle x y =
     let
         thickness =
-            2
+            4
 
         middle =
             1 + floor (gridSize / 2)
