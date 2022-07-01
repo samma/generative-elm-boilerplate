@@ -166,7 +166,7 @@ delta_h =
 
 delta_t : Float
 delta_t =
-    0.02
+    1
 
 
 diff_u : Float
