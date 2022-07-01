@@ -25,7 +25,6 @@ type alias Model =
     , k : Float
     , f : Float
     , cells : List ReactionValue
-    , prevCells : List ReactionValue
     }
 
 
@@ -43,11 +42,11 @@ type alias ReactionValue =
 
 rVal : a -> b -> c -> d -> { x : a, y : b, uValue : c, vValue : d }
 rVal =
-    \x y v u ->
+    \x y u v ->
         { x = x
         , y = y
-        , uValue = v
-        , vValue = u
+        , uValue = u
+        , vValue = v
         }
 
 
@@ -65,10 +64,9 @@ init : ( Model, Cmd Msg )
 init =
     ( { seed = Random.initialSeed (floor (42 * 10000))
       , count = 0
-      , f = 0.015
-      , k = 0.055
+      , f = 0.055
+      , k = 0.062
       , cells = initReactionValues gridSize
-      , prevCells = initReactionValues gridSize
       }
     , Cmd.none
     )
@@ -85,33 +83,6 @@ update msg model =
         AnimationFrame _ ->
             if model.count < maxIter then
                 ( iterateModel model
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
                     |> iterateModel
                 , Cmd.none
                 )
@@ -137,7 +108,7 @@ maxIter =
 
 gridSize : number
 gridSize =
-    75
+    51
 
 
 cellSize : Float
@@ -147,22 +118,22 @@ cellSize =
 
 delta_h : Float
 delta_h =
-    1.0 / gridSize
+    1
 
 
 delta_t : Float
 delta_t =
-    0.002
+    0.02
 
 
 diff_u : Float
 diff_u =
-    0.00001
+    0.1
 
 
 diff_v : Float
 diff_v =
-    0.00001
+    0.05
 
 
 view : Model -> Html Msg
@@ -183,12 +154,12 @@ drawItAll model =
 drawPieceItem : ReactionValue -> Renderable
 drawPieceItem r =
     shapes
-        [ fill (Color.hsla r.uValue (scaleReactionValsToColor r.vValue) 0.5 1) ]
+        [ fill (Color.hsla 0.5 0.5 r.vValue 1) ]
         [ rect ( toFloat r.x * cellSize, toFloat r.y * cellSize ) cellSize cellSize ]
 
 
 scaleReactionValsToColor x =
-    clamp (0.3 + (x / 1000)) 0 1
+    clamp (x / 10) 0 1
 
 
 clamp : Float -> Float -> Float -> Float
@@ -220,7 +191,7 @@ nextVals model =
             fromList model.cells
 
         getCenter x y arr =
-            Maybe.withDefault (rVal x y 0 0) (get (coordToIndex ( x, y )) arr)
+            Maybe.withDefault (rVal x y 0.0 0.0) (get (coordToIndex ( x, y )) arr)
 
         getUp x y arr =
             getCenter x (y - 1) arr
@@ -234,86 +205,38 @@ nextVals model =
         getRight x y arr =
             getCenter (x + 1) y arr
 
-        getDownRight x y arr =
-            getCenter (x + 1) (y + 1) arr
-
-        getDownLeft x y arr =
-            getCenter (x - 1) (y + 1) arr
-
-        getUpRight x y arr =
-            getCenter (x + 1) (y - 1) arr
-
-        getUpLeft x y arr =
-            getCenter (x - 1) (y - 1) arr
-
         uLap x y =
-            ((getRight x y reactionArr).uValue
-                * 0.5
+            (getRight x y reactionArr).uValue
                 + (getLeft x y reactionArr).uValue
-                * 0.5
                 + (getUp x y reactionArr).uValue
-                * 0.5
                 + (getDown x y reactionArr).uValue
-                * 0.5
-                + (getDownRight x y reactionArr).uValue
-                * 0.25
-                + (getDownLeft x y reactionArr).uValue
-                * 0.25
-                + (getUpRight x y reactionArr).uValue
-                * 0.25
-                + (getUpLeft x y reactionArr).uValue
-                * 0.25
-                - ((getCenter x y reactionArr).uValue
-                    * 3
-                  )
-            )
-                / (delta_h ^ 2)
+                - (4 * (getCenter x y reactionArr).uValue)
 
         vLap x y =
-            ((getRight x y reactionArr).vValue
-                * 0.5
+            (getRight x y reactionArr).vValue
                 + (getLeft x y reactionArr).vValue
-                * 0.5
                 + (getUp x y reactionArr).vValue
-                * 0.5
                 + (getDown x y reactionArr).vValue
-                * 0.5
-                + (getDownRight x y reactionArr).vValue
-                * 0.25
-                + (getDownLeft x y reactionArr).vValue
-                * 0.25
-                + (getUpRight x y reactionArr).vValue
-                * 0.25
-                + (getUpLeft x y reactionArr).vValue
-                * 0.25
-                - ((getCenter x y reactionArr).vValue
-                    * 3
-                  )
-            )
-                / (delta_h ^ 2)
+                - (4 * (getCenter x y reactionArr).vValue)
+
+        uvv x y =
+            (getCenter x y reactionArr).uValue
+                * (getCenter x y reactionArr).vValue
+                * (getCenter x y reactionArr).vValue
 
         next_u x y =
-            ((model.f * (1 - (getCenter x y reactionArr).uValue))
-                - (getCenter x y reactionArr).uValue
-                * ((getCenter x y reactionArr).vValue
-                    ^ 2
-                  )
-                + (diff_u
-                    * uLap x y
-                  )
+            ((diff_u * uLap x y)
+                - uvv x y
+                + (model.f * (1 - (getCenter x y reactionArr).uValue))
             )
                 * delta_t
 
         next_v x y =
-            (-1
-                * (model.f + model.k)
-                * (getCenter x y reactionArr).vValue
-                + ((getCenter x y reactionArr).uValue
-                    * ((getCenter x y reactionArr).vValue
-                        ^ 2
-                      )
+            ((diff_v * vLap x y)
+                + uvv x y
+                - ((model.f + model.k)
+                    * (getCenter x y reactionArr).vValue
                   )
-                + (diff_v * vLap x y)
             )
                 * delta_t
 
@@ -359,16 +282,20 @@ seedMiddle : Int -> Int -> ReactionValue
 seedMiddle x y =
     let
         thickness =
-            1
+            2
 
         middle =
-            gridSize / 2
+            1 + floor (gridSize / 2)
     in
-    if toFloat x < (middle + thickness) && toFloat x > (middle - thickness) && toFloat y < (middle + thickness) && toFloat y > (middle - thickness) then
-        rVal x y 1 0
+    if x < (middle + thickness) && x > (middle - thickness) && y < (middle + thickness) && y > (middle - thickness) then
+        rVal x y (Tuple.first defaultReactionValue) (Tuple.second defaultReactionValue)
 
     else
-        rVal x y 0 1
+        rVal x y 1.0 0.0
+
+
+defaultReactionValue =
+    ( 0.5, 0.25 )
 
 
 seedStick : Int -> Int -> ReactionValue
