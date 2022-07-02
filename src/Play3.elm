@@ -13,6 +13,7 @@ import Color exposing (Color)
 import Grid exposing (fold2d)
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import List.Extra exposing (..)
 import Random exposing (..)
 import Random.Extra exposing (result)
 import Simplex exposing (PermutationTable)
@@ -151,7 +152,7 @@ maxIter =
 
 gridSize : number
 gridSize =
-    51
+    75
 
 
 cellSize : Float
@@ -191,18 +192,19 @@ view model =
 
 drawItAll : Model -> List Renderable
 drawItAll model =
-    List.map drawPieceItem model.cells
+    List.map (drawPieceItem model) model.cells
 
 
-drawPieceItem : ReactionValue -> Renderable
-drawPieceItem r =
+drawPieceItem : Model -> ReactionValue -> Renderable
+drawPieceItem model r =
     shapes
+        --[ fill (Color.hsla 0.5 0.5 (scaleReactionValsToColor r model) 1) ]
         [ fill (Color.hsla 0.5 0.5 r.vValue 1) ]
         [ rect ( toFloat r.x * cellSize, toFloat r.y * cellSize ) cellSize cellSize ]
 
 
-scaleReactionValsToColor x =
-    clamp (x / 10) 0 1
+
+-- Comment out the next function!
 
 
 clamp : Float -> Float -> Float -> Float
