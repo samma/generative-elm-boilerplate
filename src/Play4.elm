@@ -18,6 +18,7 @@ import Random exposing (..)
 import Random.Extra exposing (result)
 import Simplex exposing (PermutationTable)
 import Time exposing (Posix)
+import Vector2d exposing (Vector2d)
 
 
 type alias Model =
@@ -38,16 +39,24 @@ type alias ReactionValue =
     , y : Int
     , uValue : Float
     , vValue : Float
+    , gradient : Vector
     }
 
 
-rVal : a -> b -> c -> d -> { x : a, y : b, uValue : c, vValue : d }
+type alias Vector =
+    { x : Float
+    , y : Float
+    }
+
+
+rVal : a -> b -> c -> d -> Vector -> { x : a, y : b, uValue : c, vValue : d, gradient : Vector }
 rVal =
-    \x y u v ->
+    \x y u v g ->
         { x = x
         , y = y
         , uValue = u
         , vValue = v
+        , gradient = g
         }
 
 
@@ -65,7 +74,7 @@ init : ( Model, Cmd Msg )
 init =
     ( { seed = Random.initialSeed (floor (42 * 10000))
       , count = 0
-      , f = 0.043
+      , f = 0.055
       , k = 0.062
       , cells = List.sortWith sortCells (initReactionValues gridSize)
       }
@@ -179,8 +188,8 @@ drawPieceItem model r =
             scaleReactionValsToColor r.vValue 0.05 0.3
     in
     shapes
-        [ fill (Color.hsla 0 0.5 scaledValue 1) ]
-        [ circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (cellSize / 1.5) ]
+        [ fill (Color.hsla 0 0.5 scaledValue 0.5) ]
+        [ circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (cellSize * abs scaledValue) ]
 
 
 
@@ -200,7 +209,7 @@ nextVals model =
             fromList model.cells
 
         getCenter x y arr =
-            Maybe.withDefault (rVal x y 0.0 0.0) (get (coordToIndex ( x, y )) arr)
+            Maybe.withDefault (rVal x y 0.0 0.0 (Vector 0 0)) (get (coordToIndex ( x, y )) arr)
 
         getUp x y arr =
             getCenter x (y - 1) arr
@@ -228,6 +237,15 @@ nextVals model =
                 + (getDown x y reactionArr).vValue
                 - (4 * (getCenter x y reactionArr).vValue)
 
+        gradient x y =
+            Vector
+                ((getRight x y reactionArr).vValue
+                    - (getLeft x y reactionArr).vValue
+                )
+                ((getUp x y reactionArr).vValue
+                    - (getDown x y reactionArr).vValue
+                )
+
         uvv x y =
             (getCenter x y reactionArr).uValue
                 * (getCenter x y reactionArr).vValue
@@ -250,7 +268,9 @@ nextVals model =
                 * delta_t
 
         nextVal r =
-            rVal r.x r.y (r.uValue + next_u r.x r.y) (r.vValue + next_v r.x r.y)
+            rVal r.x r.y (r.uValue + next_u r.x r.y) (r.vValue + next_v r.x r.y) (gradient r.x r.y)
+
+        -- Set the right gradient value here.
     in
     List.map nextVal model.cells
 
@@ -265,6 +285,11 @@ coordToIndex ( x, y ) =
     modBy (gridSize * gridSize) (x + (y * gridSize))
 
 
+perpendicular : Vector -> Vector
+perpendicular v =
+    Vector -v.y v.x
+
+
 initReactionValues : Int -> List ReactionValue
 initReactionValues n =
     Grid.fold2d
@@ -275,16 +300,16 @@ initReactionValues n =
 
 noiseSeeding : Int -> Int -> ReactionValue
 noiseSeeding x y =
-    rVal x y (2.0 * noise (toFloat x) (toFloat y)) (0.3 * noise (toFloat x) (toFloat y))
+    rVal x y (2.0 * noise (toFloat x) (toFloat y)) (0.3 * noise (toFloat x) (toFloat y)) (Vector 0 0)
 
 
 seedCorner : Int -> Int -> ReactionValue
 seedCorner x y =
     if x < 10 && y < 10 then
-        rVal x y (Tuple.first defaultReactionValue) (Tuple.second defaultReactionValue)
+        rVal x y (Tuple.first defaultReactionValue) (Tuple.second defaultReactionValue) (Vector 0 0)
 
     else
-        rVal x y 1 0
+        rVal x y 1 0 (Vector 0 0)
 
 
 seedMiddle : Int -> Int -> ReactionValue
@@ -297,10 +322,10 @@ seedMiddle x y =
             floor (gridSize / 2)
     in
     if x < (middle + thickness) && x > (middle - thickness) && y < (middle + thickness) && y > (middle - thickness) then
-        rVal x y (Tuple.first defaultReactionValue) (Tuple.second defaultReactionValue)
+        rVal x y (Tuple.first defaultReactionValue) (Tuple.second defaultReactionValue) (Vector 0 0)
 
     else
-        rVal x y 1.0 0.0
+        rVal x y 1.0 0.0 (Vector 0 0)
 
 
 defaultReactionValue =
