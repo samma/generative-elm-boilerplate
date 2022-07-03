@@ -65,8 +65,8 @@ init : ( Model, Cmd Msg )
 init =
     ( { seed = Random.initialSeed (floor (42 * 10000))
       , count = 0
-      , f = 0.055
-      , k = 0.062
+      , f = 0.03
+      , k = 0.055
       , cells = List.sortWith sortCells (initReactionValues gridSize)
       }
     , Cmd.none
@@ -98,6 +98,10 @@ update msg model =
                 ( iterateModel model
                     |> iterateModel
                     |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
                 , Cmd.none
                 )
 
@@ -107,7 +111,7 @@ update msg model =
 
 h : number
 h =
-    1200
+    500
 
 
 w : number
@@ -122,7 +126,7 @@ maxIter =
 
 gridSize : number
 gridSize =
-    71
+    85
 
 
 cellSize : Float
@@ -137,7 +141,7 @@ delta_h =
 
 delta_t : Float
 delta_t =
-    2.1
+    1
 
 
 diff_u : Float
@@ -154,7 +158,8 @@ view : Model -> Html Msg
 view model =
     Canvas.toHtml
         ( w, h )
-        []
+        [ style "backgroundColor" "black"
+        ]
         (drawItAll
             model
         )
@@ -169,14 +174,15 @@ drawPieceItem : Model -> ReactionValue -> Renderable
 drawPieceItem model r =
     let
         scaledValue =
-            scaleReactionValsToColor r.vValue 0 0.5
+            scaleReactionValsToColor r.vValue 0 0.4
     in
     shapes
-        [ fill (Color.hsla 0.5 0.5 scaledValue 1) ]
-        [ circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (cellSize / 1.5) ]
+        [ fill (Color.hsla (-0.5 + scaledValue) 0.5 0.5 1) ]
+        [ rect ( toFloat r.x * cellSize, toFloat r.y * cellSize ) cellSize cellSize ]
 
 
 
+--[ circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (cellSize / 1.9) ]
 --[ rect ( toFloat r.x * cellSize, toFloat r.y * cellSize ) cellSize cellSize ]
 
 
@@ -321,17 +327,17 @@ noiseSeeding x y =
 seedCorner : Int -> Int -> ReactionValue
 seedCorner x y =
     if x < 10 && y < 10 then
-        rVal x y 10 7.5
+        rVal x y (Tuple.first defaultReactionValue) (Tuple.second defaultReactionValue)
 
     else
-        rVal x y 0.1 0.02
+        rVal x y 1 0
 
 
 seedMiddle : Int -> Int -> ReactionValue
 seedMiddle x y =
     let
         thickness =
-            4
+            14
 
         middle =
             floor (gridSize / 2)
