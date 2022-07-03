@@ -126,7 +126,7 @@ maxIter =
 
 gridSize : number
 gridSize =
-    85
+    81
 
 
 cellSize : Float
@@ -174,7 +174,7 @@ drawPieceItem : Model -> ReactionValue -> Renderable
 drawPieceItem model r =
     let
         scaledValue =
-            scaleReactionValsToColor r.vValue 0 0.3
+            scaleReactionValsToColor r.vValue 0.05 0.3
     in
     shapes
         [ fill (Color.hsla 0 0.5 scaledValue 1) ]
@@ -309,7 +309,7 @@ indexToCoord i =
 
 coordToIndex : ( Int, Int ) -> Int
 coordToIndex ( x, y ) =
-    x + (y * gridSize)
+    modBy (gridSize * gridSize) (x + (y * gridSize))
 
 
 initReactionValues : Int -> List ReactionValue
