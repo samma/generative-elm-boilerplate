@@ -98,36 +98,6 @@ update msg model =
                 ( iterateModel model
                     |> iterateModel
                     |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
                 , Cmd.none
                 )
 
@@ -152,7 +122,7 @@ maxIter =
 
 gridSize : number
 gridSize =
-    75
+    71
 
 
 cellSize : Float
@@ -167,7 +137,7 @@ delta_h =
 
 delta_t : Float
 delta_t =
-    1
+    2.1
 
 
 diff_u : Float
@@ -203,7 +173,11 @@ drawPieceItem model r =
     in
     shapes
         [ fill (Color.hsla 0.5 0.5 scaledValue 1) ]
-        [ rect ( toFloat r.x * cellSize, toFloat r.y * cellSize ) cellSize cellSize ]
+        [ circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (cellSize / 1.5) ]
+
+
+
+--[ rect ( toFloat r.x * cellSize, toFloat r.y * cellSize ) cellSize cellSize ]
 
 
 scaleReactionValsToColor val minVal maxVal =
