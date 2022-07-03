@@ -187,7 +187,7 @@ drawPieceItem model r =
             scaleReactionValsToColor r.vValue 0.05 0.3
     in
     shapes
-        [ fill (Color.hsla scaledValue 0.5 scaledValue scaledValue) ]
+        [ fill (Color.hsla (sin (0.005 * scaledValue * toFloat model.count)) 0.5 (sin (0.05 * scaledValue * toFloat model.count)) scaledValue) ]
         [ circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (10 + cellSize * abs scaledValue) ]
 
 
