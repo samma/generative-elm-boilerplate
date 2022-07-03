@@ -108,7 +108,6 @@ update msg model =
                     |> iterateModel
                     |> iterateModel
                     |> iterateModel
-                    |> iterateModel
                 , Cmd.none
                 )
 
@@ -118,7 +117,7 @@ update msg model =
 
 h : number
 h =
-    500
+    900
 
 
 w : number
@@ -188,8 +187,8 @@ drawPieceItem model r =
             scaleReactionValsToColor r.vValue 0.05 0.3
     in
     shapes
-        [ fill (Color.hsla 0 0.5 scaledValue 0.5) ]
-        [ circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (cellSize * abs scaledValue) ]
+        [ fill (Color.hsla scaledValue 0.5 scaledValue scaledValue) ]
+        [ circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (10 + cellSize * abs scaledValue) ]
 
 
 
@@ -338,7 +337,7 @@ defaultReactionValue =
 
 permTable : PermutationTable
 permTable =
-    Simplex.permutationTableFromInt 10
+    Simplex.permutationTableFromInt 23
 
 
 
