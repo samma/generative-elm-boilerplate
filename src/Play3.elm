@@ -199,15 +199,18 @@ drawPieceItem : Model -> ReactionValue -> Renderable
 drawPieceItem model r =
     let
         scaledValue =
-            scaleReactionValsToColor r.vValue model
+            scaleReactionValsToColor r.vValue 0 0.5
     in
     shapes
         [ fill (Color.hsla 0.5 0.5 scaledValue 1) ]
         [ rect ( toFloat r.x * cellSize, toFloat r.y * cellSize ) cellSize cellSize ]
 
 
-scaleReactionValsToColor : Float -> Model -> Float
-scaleReactionValsToColor val model =
+scaleReactionValsToColor val minVal maxVal =
+    (val - minVal) / (maxVal - minVal)
+
+
+slowScalingVals val min max model =
     let
         maybMaxVal =
             List.Extra.maximumBy .vValue model.cells
@@ -221,7 +224,7 @@ scaleReactionValsToColor val model =
         minVal =
             checkMaybeVal maybMinVal
     in
-    (val - minVal.vValue) / (maxVal.vValue - minVal.vValue)
+    scaleReactionValsToColor val minVal.vValue maxVal.vValue
 
 
 checkMaybeVal : Maybe ReactionValue -> ReactionValue
