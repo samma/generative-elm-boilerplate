@@ -100,8 +100,6 @@ update msg model =
                     |> iterateModel
                     |> iterateModel
                     |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
                 , Cmd.none
                 )
 
@@ -134,11 +132,6 @@ cellSize =
     h / gridSize
 
 
-delta_h : Float
-delta_h =
-    1
-
-
 delta_t : Float
 delta_t =
     1
@@ -165,6 +158,15 @@ view model =
         )
 
 
+iterateModel : Model -> Model
+iterateModel model =
+    let
+        nextCells =
+            nextVals model
+    in
+    { model | cells = nextCells, count = model.count + 1 }
+
+
 drawItAll : Model -> List Renderable
 drawItAll model =
     List.map (drawPieceItem model) model.cells
@@ -189,55 +191,6 @@ drawPieceItem model r =
 
 scaleReactionValsToColor val minVal maxVal =
     (val - minVal) / (maxVal - minVal)
-
-
-slowScalingVals val min max model =
-    let
-        maybMaxVal =
-            List.Extra.maximumBy .vValue model.cells
-
-        maybMinVal =
-            List.Extra.minimumBy .vValue model.cells
-
-        maxVal =
-            checkMaybeVal maybMaxVal
-
-        minVal =
-            checkMaybeVal maybMinVal
-    in
-    scaleReactionValsToColor val minVal.vValue maxVal.vValue
-
-
-checkMaybeVal : Maybe ReactionValue -> ReactionValue
-checkMaybeVal maybeVal =
-    case maybeVal of
-        Nothing ->
-            rVal 0 0 0 0
-
-        Just val ->
-            val
-
-
-clamp : Float -> Float -> Float -> Float
-clamp =
-    \x min max ->
-        if x < min then
-            min
-
-        else if x > max then
-            max
-
-        else
-            x
-
-
-iterateModel : Model -> Model
-iterateModel model =
-    let
-        nextCells =
-            nextVals model
-    in
-    { model | cells = nextCells, count = model.count + 1 }
 
 
 nextVals : Model -> List ReactionValue
