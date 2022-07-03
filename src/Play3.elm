@@ -360,7 +360,7 @@ seedMiddle x y =
             4
 
         middle =
-            1 + floor (gridSize / 2)
+            floor (gridSize / 2)
     in
     if x < (middle + thickness) && x > (middle - thickness) && y < (middle + thickness) && y > (middle - thickness) then
         rVal x y (Tuple.first defaultReactionValue) (Tuple.second defaultReactionValue)
