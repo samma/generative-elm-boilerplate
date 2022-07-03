@@ -65,8 +65,8 @@ init : ( Model, Cmd Msg )
 init =
     ( { seed = Random.initialSeed (floor (42 * 10000))
       , count = 0
-      , f = 0.025
-      , k = 0.055
+      , f = 0.043
+      , k = 0.062
       , cells = List.sortWith sortCells (initReactionValues gridSize)
       }
     , Cmd.none
@@ -126,7 +126,7 @@ maxIter =
 
 gridSize : number
 gridSize =
-    81
+    51
 
 
 cellSize : Float
@@ -354,37 +354,13 @@ defaultReactionValue =
     ( 0.5, 0.25 )
 
 
-seedStick : Int -> Int -> ReactionValue
-seedStick x y =
-    let
-        thickness =
-            10.0
-
-        middle =
-            gridSize / 2
-    in
-    if toFloat x < (middle + thickness + (3 / toFloat y)) && toFloat x > (middle - thickness) && toFloat y < (middle + thickness) then
-        rVal x y 0.61 0.5
-
-    else
-        rVal x y 0.01 0.05
-
-
-initZeroReactionValues : Int -> List ReactionValue
-initZeroReactionValues n =
-    Grid.fold2d
-        { rows = n, cols = n }
-        (\( x, y ) result -> rVal x y 0 0 :: result)
-        []
-
-
 
 --Create a permutation table, using 42 as the seed
 
 
 permTable : PermutationTable
 permTable =
-    Simplex.permutationTableFromInt 1
+    Simplex.permutationTableFromInt 10
 
 
 
