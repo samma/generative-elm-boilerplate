@@ -65,7 +65,7 @@ init : ( Model, Cmd Msg )
 init =
     ( { seed = Random.initialSeed (floor (42 * 10000))
       , count = 0
-      , f = 0.03
+      , f = 0.025
       , k = 0.055
       , cells = List.sortWith sortCells (initReactionValues gridSize)
       }
@@ -174,14 +174,15 @@ drawPieceItem : Model -> ReactionValue -> Renderable
 drawPieceItem model r =
     let
         scaledValue =
-            scaleReactionValsToColor r.vValue 0 0.4
+            scaleReactionValsToColor r.vValue 0 0.3
     in
     shapes
-        [ fill (Color.hsla (-0.5 + scaledValue) 0.5 0.5 1) ]
-        [ rect ( toFloat r.x * cellSize, toFloat r.y * cellSize ) cellSize cellSize ]
+        [ fill (Color.hsla 0 0.5 scaledValue 1) ]
+        [ circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (cellSize / 1.5) ]
 
 
 
+--[ rect ( toFloat r.x * cellSize, toFloat r.y * cellSize ) cellSize cellSize ]
 --[ circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (cellSize / 1.9) ]
 --[ rect ( toFloat r.x * cellSize, toFloat r.y * cellSize ) cellSize cellSize ]
 
@@ -315,13 +316,13 @@ initReactionValues : Int -> List ReactionValue
 initReactionValues n =
     Grid.fold2d
         { rows = n, cols = n }
-        (\( x, y ) result -> seedMiddle x y :: result)
+        (\( x, y ) result -> noiseSeeding x y :: result)
         []
 
 
 noiseSeeding : Int -> Int -> ReactionValue
 noiseSeeding x y =
-    rVal x y (2 * noise (toFloat x) (toFloat y)) (3 * noise (toFloat x) (toFloat y))
+    rVal x y (2.0 * noise (toFloat x) (toFloat y)) (0.3 * noise (toFloat x) (toFloat y))
 
 
 seedCorner : Int -> Int -> ReactionValue
@@ -383,7 +384,7 @@ initZeroReactionValues n =
 
 permTable : PermutationTable
 permTable =
-    Simplex.permutationTableFromInt 43
+    Simplex.permutationTableFromInt 1
 
 
 
