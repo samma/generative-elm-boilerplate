@@ -197,14 +197,41 @@ drawItAll model =
 
 drawPieceItem : Model -> ReactionValue -> Renderable
 drawPieceItem model r =
+    let
+        scaledValue =
+            scaleReactionValsToColor r.vValue model
+    in
     shapes
-        --[ fill (Color.hsla 0.5 0.5 (scaleReactionValsToColor r model) 1) ]
-        [ fill (Color.hsla 0.5 0.5 r.vValue 1) ]
+        [ fill (Color.hsla 0.5 0.5 scaledValue 1) ]
         [ rect ( toFloat r.x * cellSize, toFloat r.y * cellSize ) cellSize cellSize ]
 
 
+scaleReactionValsToColor : Float -> Model -> Float
+scaleReactionValsToColor val model =
+    let
+        maybMaxVal =
+            List.Extra.maximumBy .vValue model.cells
 
--- Comment out the next function!
+        maybMinVal =
+            List.Extra.minimumBy .vValue model.cells
+
+        maxVal =
+            checkMaybeVal maybMaxVal
+
+        minVal =
+            checkMaybeVal maybMinVal
+    in
+    (val - minVal.vValue) / (maxVal.vValue - minVal.vValue)
+
+
+checkMaybeVal : Maybe ReactionValue -> ReactionValue
+checkMaybeVal maybeVal =
+    case maybeVal of
+        Nothing ->
+            rVal 0 0 0 0
+
+        Just val ->
+            val
 
 
 clamp : Float -> Float -> Float -> Float
