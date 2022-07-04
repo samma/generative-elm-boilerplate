@@ -177,8 +177,23 @@ iterateModel model =
 
 drawItAll : Model -> List Renderable
 drawItAll model =
-    --List.map (drawReactionCircles model) model.cells
-    List.map (drawPerpendicularLines model) model.cells
+    let
+        circs =
+            List.map (drawReactionCircles model) model.cells
+
+        myLines =
+            List.map (drawPerpendicularLines model) model.cells
+    in
+    shapes
+        [ fill (Color.hsla 1.0 1.0 1.0 1) ]
+        [ rect ( 0.0, 0.0 ) h h ]
+        :: circs
+        ++ myLines
+
+
+
+--List.map (drawReactionCircles model) model.cells
+--List.map (drawPerpendicularLines model) model.cells
 
 
 drawReactionCircles : Model -> ReactionValue -> Renderable
@@ -204,12 +219,15 @@ drawPerpendicularLines model r =
     let
         origin =
             { x = toFloat r.x * cellSize, y = toFloat r.y * cellSize }
+
+        strength =
+            5
     in
     shapes
-        [ stroke Color.white
+        [ stroke Color.black
         , lineWidth 1
         ]
-        [ path ( origin.x, origin.y ) [ lineTo ( origin.x + r.gradient.x * cellSize, origin.y + r.gradient.y * cellSize ) ] ]
+        [ path ( origin.x, origin.y ) [ lineTo ( origin.x + r.gradient.x * cellSize * strength, origin.y + r.gradient.y * cellSize * strength ) ] ]
 
 
 scaleReactionValsToColor val minVal maxVal =
