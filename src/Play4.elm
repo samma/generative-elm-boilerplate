@@ -132,7 +132,7 @@ maxIter =
 
 gridSize : number
 gridSize =
-    51
+    41
 
 
 cellSize : Float
@@ -222,12 +222,15 @@ drawPerpendicularLines model r =
 
         strength =
             5
+
+        perpGrad =
+            perpendicular r.gradient
     in
     shapes
         [ stroke Color.black
         , lineWidth 1
         ]
-        [ path ( origin.x, origin.y ) [ lineTo ( origin.x + r.gradient.x * cellSize * strength, origin.y + r.gradient.y * cellSize * strength ) ] ]
+        [ path ( origin.x, origin.y ) [ lineTo ( origin.x + (perpGrad.x * cellSize * strength), origin.y + (perpGrad.y * cellSize * strength) ) ] ]
 
 
 scaleReactionValsToColor val minVal maxVal =
