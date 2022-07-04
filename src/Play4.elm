@@ -27,6 +27,7 @@ type alias Model =
     , k : Float
     , f : Float
     , cells : List ReactionValue
+    , floaters : List Vector
     }
 
 
@@ -77,6 +78,7 @@ init =
       , f = 0.055
       , k = 0.062
       , cells = List.sortWith sortCells (initReactionValues gridSize)
+      , floaters = initFloater gridSize
       }
     , Cmd.none
     )
@@ -155,6 +157,10 @@ diff_v =
     0.05
 
 
+getCenter x y arr =
+    Maybe.withDefault (rVal x y 0.0 0.0 (Vector 0 0)) (get (coordToIndex ( x, y )) arr)
+
+
 view : Model -> Html Msg
 view model =
     Canvas.toHtml
@@ -171,8 +177,11 @@ iterateModel model =
     let
         nextCells =
             nextVals model
+
+        nextFloaterCalc =
+            nextFloaters model
     in
-    { model | cells = nextCells, count = model.count + 1 }
+    { model | cells = nextCells, count = model.count + 1, floaters = nextFloaterCalc }
 
 
 drawItAll : Model -> List Renderable
@@ -243,9 +252,6 @@ nextVals model =
         reactionArr =
             fromList model.cells
 
-        getCenter x y arr =
-            Maybe.withDefault (rVal x y 0.0 0.0 (Vector 0 0)) (get (coordToIndex ( x, y )) arr)
-
         getUp x y arr =
             getCenter x (y - 1) arr
 
@@ -310,6 +316,24 @@ nextVals model =
     List.map nextVal model.cells
 
 
+nextFloaters : Model -> List Vector
+nextFloaters model =
+    List.map (nextFloater model) model.floaters
+
+
+nextFloater : Model -> Vector -> Vector
+nextFloater model floater =
+    -- TODO think this a bit more through. Need to assoiate the floater with the correct cell.
+    let
+        perpVec location =
+            perpendicular (getCenter (floor location.x) (floor location.y) (fromList model.cells)).gradient
+
+        nFloater =
+            perpVec floater
+    in
+    nFloater
+
+
 indexToCoord : Int -> ( Int, Int )
 indexToCoord i =
     ( modBy i gridSize, i // gridSize )
@@ -330,6 +354,14 @@ initReactionValues n =
     Grid.fold2d
         { rows = n, cols = n }
         (\( x, y ) result -> noiseSeeding x y :: result)
+        []
+
+
+initFloater : Int -> List Vector
+initFloater n =
+    Grid.fold2d
+        { rows = n, cols = n }
+        (\( x, y ) result -> Vector (toFloat x * cellSize) (toFloat y * cellSize) :: result)
         []
 
 
