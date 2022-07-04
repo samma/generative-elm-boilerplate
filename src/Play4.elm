@@ -177,24 +177,39 @@ iterateModel model =
 
 drawItAll : Model -> List Renderable
 drawItAll model =
-    List.map (drawPieceItem model) model.cells
+    --List.map (drawReactionCircles model) model.cells
+    List.map (drawPerpendicularLines model) model.cells
 
 
-drawPieceItem : Model -> ReactionValue -> Renderable
-drawPieceItem model r =
+drawReactionCircles : Model -> ReactionValue -> Renderable
+drawReactionCircles model r =
     let
         scaledValue =
             scaleReactionValsToColor r.vValue 0.05 0.3
     in
     shapes
-        [ fill (Color.hsla (sin (0.005 * scaledValue * toFloat model.count)) 0.5 (sin (0.05 * scaledValue * toFloat model.count)) scaledValue) ]
-        [ circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (10 + cellSize * abs scaledValue) ]
+        [ fill (Color.hsla 0.2 0.5 0.5 scaledValue) ]
+        [ circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) cellSize
+        ]
 
 
 
 --[ rect ( toFloat r.x * cellSize, toFloat r.y * cellSize ) cellSize cellSize ]
 --[ circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (cellSize / 1.9) ]
 --[ rect ( toFloat r.x * cellSize, toFloat r.y * cellSize ) cellSize cellSize ]
+
+
+drawPerpendicularLines : Model -> ReactionValue -> Renderable
+drawPerpendicularLines model r =
+    let
+        origin =
+            { x = toFloat r.x * cellSize, y = toFloat r.y * cellSize }
+    in
+    shapes
+        [ stroke Color.white
+        , lineWidth 1
+        ]
+        [ path ( origin.x, origin.y ) [ lineTo ( origin.x + r.gradient.x * cellSize, origin.y + r.gradient.y * cellSize ) ] ]
 
 
 scaleReactionValsToColor val minVal maxVal =
