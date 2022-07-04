@@ -190,17 +190,21 @@ drawItAll model =
         circs =
             List.map (drawReactionCircles model) model.cells
 
-        myLines =
+        debugLines =
             List.map (drawPerpendicularLines model) model.cells
+
+        floaters =
+            List.map (drawFloater model) model.floaters
     in
     shapes
         [ fill (Color.hsla 1.0 1.0 1.0 1) ]
         [ rect ( 0.0, 0.0 ) h h ]
-        :: circs
-        ++ myLines
+        :: floaters
+        ++ circs
 
 
 
+--++ debugLines
 --List.map (drawReactionCircles model) model.cells
 --List.map (drawPerpendicularLines model) model.cells
 
@@ -213,7 +217,7 @@ drawReactionCircles model r =
     in
     shapes
         [ fill (Color.hsla 0.2 0.5 0.5 scaledValue) ]
-        [ circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) cellSize
+        [ circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) 1
         ]
 
 
@@ -221,6 +225,14 @@ drawReactionCircles model r =
 --[ rect ( toFloat r.x * cellSize, toFloat r.y * cellSize ) cellSize cellSize ]
 --[ circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (cellSize / 1.9) ]
 --[ rect ( toFloat r.x * cellSize, toFloat r.y * cellSize ) cellSize cellSize ]
+
+
+drawFloater : Model -> Vector -> Renderable
+drawFloater model floater =
+    shapes
+        [ fill (Color.hsla 0 0 0 1) ]
+        [ circle ( floater.x, floater.y ) (cellSize / 1.9)
+        ]
 
 
 drawPerpendicularLines : Model -> ReactionValue -> Renderable
@@ -326,12 +338,15 @@ nextFloater model floater =
     -- TODO think this a bit more through. Need to assoiate the floater with the correct cell.
     let
         perpVec location =
-            perpendicular (getCenter (floor location.x) (floor location.y) (fromList model.cells)).gradient
+            perpendicular (getCenter (floor (location.x / cellSize)) (floor (location.y / cellSize)) (fromList model.cells)).gradient
 
         nFloater =
             perpVec floater
+
+        strength =
+            10
     in
-    nFloater
+    Vector (floater.x + (strength * nFloater.x)) (floater.y + (strength * nFloater.y))
 
 
 indexToCoord : Int -> ( Int, Int )
