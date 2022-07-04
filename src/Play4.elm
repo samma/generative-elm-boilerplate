@@ -75,7 +75,7 @@ init : ( Model, Cmd Msg )
 init =
     ( { seed = Random.initialSeed (floor (42 * 10000))
       , count = 0
-      , f = 0.055
+      , f = 0.035
       , k = 0.062
       , cells = List.sortWith sortCells (initReactionValues gridSize)
       , floaters = initFloater gridSize
@@ -107,6 +107,12 @@ update msg model =
         AnimationFrame _ ->
             if model.count < maxIter then
                 ( iterateModel model
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
+                    |> iterateModel
                     |> iterateModel
                     |> iterateModel
                     |> iterateModel
@@ -198,8 +204,7 @@ drawItAll model =
     in
     shapes
         [ fill (Color.hsla 1.0 1.0 1.0 1) ]
-        []
-        -- rect ( 0.0, 0.0 ) h h ]
+        [ rect ( 0.0, 0.0 ) h h ]
         :: circs
         ++ floaters
 
@@ -369,14 +374,14 @@ initReactionValues : Int -> List ReactionValue
 initReactionValues n =
     Grid.fold2d
         { rows = n, cols = n }
-        (\( x, y ) result -> noiseSeeding x y :: result)
+        (\( x, y ) result -> seedMiddle x y :: result)
         []
 
 
 initFloater : Int -> List Vector
 initFloater n =
     Grid.fold2d
-        { rows = n, cols = n }
+        { rows = n // 2, cols = n // 2 }
         (\( x, y ) result -> Vector (toFloat x * cellSize) (toFloat y * cellSize) :: result)
         []
 
