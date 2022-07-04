@@ -75,7 +75,7 @@ init : ( Model, Cmd Msg )
 init =
     ( { seed = Random.initialSeed (floor (42 * 10000))
       , count = 0
-      , f = 0.035
+      , f = 0.055
       , k = 0.062
       , cells = List.sortWith sortCells (initReactionValues gridSize)
       , floaters = initFloater gridSize
@@ -211,6 +211,7 @@ drawItAll model =
 
 
 --++ debugLines
+--++ debugLines
 --List.map (drawReactionCircles model) model.cells
 --List.map (drawPerpendicularLines model) model.cells
 
@@ -343,14 +344,17 @@ nextFloater : Model -> Vector -> Vector
 nextFloater model floater =
     -- TODO think this a bit more through. Need to assoiate the floater with the correct cell.
     let
+        middleAdjust =
+            cellSize / 2.0
+
         perpVec location =
-            perpendicular (getCenter (floor (location.x / cellSize)) (floor (location.y / cellSize)) (fromList model.cells)).gradient
+            perpendicular (getCenter (floor (middleAdjust + (location.x / cellSize))) (floor (middleAdjust + (location.y / cellSize))) (fromList model.cells)).gradient
 
         nFloater =
             perpVec floater
 
         strength =
-            50
+            20
     in
     Vector (floater.x + (strength * nFloater.x)) (floater.y + (strength * nFloater.y))
 
@@ -382,7 +386,7 @@ initFloater : Int -> List Vector
 initFloater n =
     Grid.fold2d
         { rows = n // 2, cols = n // 2 }
-        (\( x, y ) result -> Vector (toFloat x * cellSize) (toFloat y * cellSize) :: result)
+        (\( x, y ) result -> Vector ((toFloat x + 0.5) * 2 * cellSize) ((toFloat y + 0.5) * 2 * cellSize) :: result)
         []
 
 
