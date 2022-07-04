@@ -198,9 +198,10 @@ drawItAll model =
     in
     shapes
         [ fill (Color.hsla 1.0 1.0 1.0 1) ]
-        [ rect ( 0.0, 0.0 ) h h ]
-        :: floaters
-        ++ circs
+        []
+        -- rect ( 0.0, 0.0 ) h h ]
+        :: circs
+        ++ floaters
 
 
 
@@ -217,7 +218,7 @@ drawReactionCircles model r =
     in
     shapes
         [ fill (Color.hsla 0.2 0.5 0.5 scaledValue) ]
-        [ circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) 1
+        [ circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (cellSize * abs scaledValue / 5)
         ]
 
 
@@ -230,8 +231,8 @@ drawReactionCircles model r =
 drawFloater : Model -> Vector -> Renderable
 drawFloater model floater =
     shapes
-        [ fill (Color.hsla 0 0 0 1) ]
-        [ circle ( floater.x, floater.y ) (cellSize / 1.9)
+        [ fill (Color.hsla 0.6 0.5 0.5 0.5) ]
+        [ circle ( floater.x, floater.y ) (cellSize / 5)
         ]
 
 
@@ -344,7 +345,7 @@ nextFloater model floater =
             perpVec floater
 
         strength =
-            10
+            50
     in
     Vector (floater.x + (strength * nFloater.x)) (floater.y + (strength * nFloater.y))
 
