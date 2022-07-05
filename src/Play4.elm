@@ -345,7 +345,7 @@ nextFloater model floater =
     -- TODO think this a bit more through. Need to assoiate the floater with the correct cell.
     let
         middleAdjust =
-            cellSize / 2.0
+            0.5
 
         perpVec location =
             perpendicular (getCenter (floor (middleAdjust + (location.x / cellSize))) (floor (middleAdjust + (location.y / cellSize))) (fromList model.cells)).gradient
@@ -354,7 +354,7 @@ nextFloater model floater =
             perpVec floater
 
         strength =
-            20
+            40
     in
     Vector (floater.x + (strength * nFloater.x)) (floater.y + (strength * nFloater.y))
 
@@ -371,7 +371,7 @@ coordToIndex ( x, y ) =
 
 perpendicular : Vector -> Vector
 perpendicular v =
-    Vector -v.y v.x
+    Vector v.x -v.y
 
 
 initReactionValues : Int -> List ReactionValue
