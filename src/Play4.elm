@@ -235,8 +235,8 @@ drawReactionCircles model r =
 drawFloater : Model -> Vector -> Renderable
 drawFloater model floater =
     shapes
-        [ fill (Color.hsla (toFloat model.count / 10000) 0.5 0.5 0.5) ]
-        [ circle ( floater.x, floater.y ) (cellSize / 5)
+        [ fill (Color.hsla (toFloat model.count / 1000) 0.5 0.5 0.5) ]
+        [ circle ( floater.x, floater.y ) (cellSize / 2)
         ]
 
 
@@ -346,18 +346,18 @@ nextFloater model floater =
             0.5
 
         perpVec location =
-            perpendicular (getCenter (floor (middleAdjust + (location.x / cellSize))) (floor (middleAdjust + (location.y / cellSize))) (fromList model.cells)).gradient
+            perpendicular (normalize (getCenter (floor (middleAdjust + (location.x / cellSize))) (floor (middleAdjust + (location.y / cellSize))) (fromList model.cells)).gradient)
 
         perpendicularMovement =
-            perpVec (normalize floater)
+            perpVec floater
 
         normalize v =
             Vector
-                (v.x / sqrt ((v.x * v.x) + (v.y * v.y)))
-                (v.y / sqrt ((v.x * v.x) + (v.y * v.y)))
+                (v.x / (0.0001 + sqrt ((v.x * v.x) + (v.y * v.y)))) -- ( the 0.0001 is to prevent divide by zero )
+                (v.y / (0.0001 + sqrt ((v.x * v.x) + (v.y * v.y))))
 
         floaterSpeed =
-            1000
+            10
     in
     Vector (floater.x + (floaterSpeed * perpendicularMovement.x)) (floater.y + (floaterSpeed * perpendicularMovement.y))
 
