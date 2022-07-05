@@ -75,13 +75,17 @@ init : ( Model, Cmd Msg )
 init =
     ( { seed = Random.initialSeed (floor (42 * 10000))
       , count = 0
-      , f = 0.055
-      , k = 0.062
+      , f = 0.025
+      , k = 0.055
       , cells = List.sortWith sortCells (initReactionValues gridSize)
       , floaters = initFloater gridSize
       }
     , Cmd.none
     )
+
+
+defaultReactionValue =
+    ( 0.5, 0.25 )
 
 
 sortCells a b =
@@ -107,15 +111,6 @@ update msg model =
         AnimationFrame _ ->
             if model.count < maxIter then
                 ( iterateModel model
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
-                    |> iterateModel
                 , Cmd.none
                 )
 
@@ -240,7 +235,7 @@ drawReactionCircles model r =
 drawFloater : Model -> Vector -> Renderable
 drawFloater model floater =
     shapes
-        [ fill (Color.hsla 0.6 0.5 0.5 0.5) ]
+        [ fill (Color.hsla (toFloat model.count / 10000) 0.5 0.5 0.5) ]
         [ circle ( floater.x, floater.y ) (cellSize / 5)
         ]
 
@@ -356,10 +351,10 @@ nextFloater model floater =
         nFloater =
             perpVec floater
 
-        strength =
-            gridSize
+        floaterSpeed =
+            10
     in
-    Vector (floater.x + (strength * nFloater.x)) (floater.y + (strength * nFloater.y))
+    Vector (floater.x + (floaterSpeed * nFloater.x)) (floater.y + (floaterSpeed * nFloater.y))
 
 
 indexToCoord : Int -> ( Int, Int )
@@ -388,7 +383,7 @@ initReactionValues n =
 initFloater : Int -> List Vector
 initFloater n =
     Grid.fold2d
-        { rows = n // 2, cols = n // 2 }
+        { rows = n , cols = n }
         (\( x, y ) result -> Vector ((toFloat x + 0.5) * 2 * cellSize) ((toFloat y + 0.5) * 2 * cellSize) :: result)
         []
 
@@ -421,10 +416,6 @@ seedMiddle x y =
 
     else
         rVal x y 1.0 0.0 (Vector 0 0)
-
-
-defaultReactionValue =
-    ( 0.5, 0.25 )
 
 
 
