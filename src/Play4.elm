@@ -348,13 +348,18 @@ nextFloater model floater =
         perpVec location =
             perpendicular (getCenter (floor (middleAdjust + (location.x / cellSize))) (floor (middleAdjust + (location.y / cellSize))) (fromList model.cells)).gradient
 
-        nFloater =
-            perpVec floater
+        perpendicularMovement =
+            perpVec (normalize floater)
+
+        normalize v =
+            Vector
+                (v.x / sqrt ((v.x * v.x) + (v.y * v.y)))
+                (v.y / sqrt ((v.x * v.x) + (v.y * v.y)))
 
         floaterSpeed =
-            10
+            1000
     in
-    Vector (floater.x + (floaterSpeed * nFloater.x)) (floater.y + (floaterSpeed * nFloater.y))
+    Vector (floater.x + (floaterSpeed * perpendicularMovement.x)) (floater.y + (floaterSpeed * perpendicularMovement.y))
 
 
 indexToCoord : Int -> ( Int, Int )
@@ -383,7 +388,7 @@ initReactionValues n =
 initFloater : Int -> List Vector
 initFloater n =
     Grid.fold2d
-        { rows = n , cols = n }
+        { rows = n, cols = n }
         (\( x, y ) result -> Vector ((toFloat x + 0.5) * 2 * cellSize) ((toFloat y + 0.5) * 2 * cellSize) :: result)
         []
 
