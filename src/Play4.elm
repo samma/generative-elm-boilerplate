@@ -201,12 +201,15 @@ drawItAll model =
 
         floaters =
             List.map (drawFloater model) model.floaters
+
+        resetToWhite =
+            rect ( 0.0, 0.0 ) h h
     in
     shapes
         [ fill (Color.hsla 1.0 1.0 1.0 1) ]
-        [ rect ( 0.0, 0.0 ) h h ]
-        :: circs
-        ++ floaters
+        []
+        --:: circs
+        :: floaters
 
 
 
@@ -354,7 +357,7 @@ nextFloater model floater =
             perpVec floater
 
         strength =
-            40
+            gridSize
     in
     Vector (floater.x + (strength * nFloater.x)) (floater.y + (strength * nFloater.y))
 
@@ -371,7 +374,7 @@ coordToIndex ( x, y ) =
 
 perpendicular : Vector -> Vector
 perpendicular v =
-    Vector v.x -v.y
+    Vector -v.y v.x
 
 
 initReactionValues : Int -> List ReactionValue
