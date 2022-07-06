@@ -135,7 +135,7 @@ maxIter =
 
 gridSize : number
 gridSize =
-    41
+    42
 
 
 cellSize : Float
@@ -202,12 +202,13 @@ drawItAll model =
     in
     shapes
         [ fill (Color.hsla 1.0 1.0 1.0 1) ]
-        []
-        --:: circs
-        :: floaters
+        [ resetToWhite ]
+        :: circs
+        ++ floaters
 
 
 
+-- :: circs
 --++ debugLines
 --++ debugLines
 --List.map (drawReactionCircles model) model.cells
@@ -352,12 +353,14 @@ nextFloater model floater =
             perpVec floater
 
         normalize v =
-            Vector
-                (v.x / (0.0001 + sqrt ((v.x * v.x) + (v.y * v.y)))) -- ( the 0.0001 is to prevent divide by zero )
-                (v.y / (0.0001 + sqrt ((v.x * v.x) + (v.y * v.y))))
+            v
 
+        --     Vector
+        --         (v.x / (0.0001 + sqrt ((v.x * v.x) + (v.y * v.y))))
+        --         -- ( the 0.0001 is to prevent divide by zero )
+        --         (v.y / (0.0001 + sqrt ((v.x * v.x) + (v.y * v.y))))
         floaterSpeed =
-            10
+            100
     in
     Vector (floater.x + (floaterSpeed * perpendicularMovement.x)) (floater.y + (floaterSpeed * perpendicularMovement.y))
 
