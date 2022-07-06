@@ -75,8 +75,8 @@ init : ( Model, Cmd Msg )
 init =
     ( { seed = Random.initialSeed (floor (42 * 10000))
       , count = 0
-      , f = 0.025
-      , k = 0.055
+      , f = 0.02
+      , k = 0.05
       , cells = List.sortWith sortCells (initReactionValues gridSize)
       , floaters = initFloater gridSize
       }
@@ -202,9 +202,9 @@ drawItAll model =
     in
     shapes
         [ fill (Color.hsla 1.0 1.0 1.0 1) ]
-        [ resetToWhite ]
-        :: circs
-        ++ floaters
+        []
+        --:: circs
+        :: floaters
 
 
 
@@ -298,11 +298,11 @@ nextVals model =
 
         gradient x y =
             Vector
-                ((getRight x y reactionArr).vValue
-                    - (getLeft x y reactionArr).vValue
+                ((getRight x y reactionArr).uValue
+                    - (getLeft x y reactionArr).uValue
                 )
-                ((getUp x y reactionArr).vValue
-                    - (getDown x y reactionArr).vValue
+                ((getUp x y reactionArr).uValue
+                    - (getDown x y reactionArr).uValue
                 )
 
         uvv x y =
@@ -346,21 +346,25 @@ nextFloater model floater =
         middleAdjust =
             0.5
 
+        invert v =
+            Vector
+                (v.x * -1)
+                (v.y * -1)
+
         perpVec location =
             perpendicular (normalize (getCenter (floor (middleAdjust + (location.x / cellSize))) (floor (middleAdjust + (location.y / cellSize))) (fromList model.cells)).gradient)
 
         perpendicularMovement =
-            perpVec floater
+            invert (perpVec floater)
 
         normalize v =
-            v
+            Vector
+                (v.x / (0.0001 + sqrt ((v.x * v.x) + (v.y * v.y))))
+                -- ( the 0.0001 is to prevent divide by zero )
+                (v.y / (0.0001 + sqrt ((v.x * v.x) + (v.y * v.y))))
 
-        --     Vector
-        --         (v.x / (0.0001 + sqrt ((v.x * v.x) + (v.y * v.y))))
-        --         -- ( the 0.0001 is to prevent divide by zero )
-        --         (v.y / (0.0001 + sqrt ((v.x * v.x) + (v.y * v.y))))
         floaterSpeed =
-            100
+            5
     in
     Vector (floater.x + (floaterSpeed * perpendicularMovement.x)) (floater.y + (floaterSpeed * perpendicularMovement.y))
 
@@ -414,7 +418,7 @@ seedMiddle : Int -> Int -> ReactionValue
 seedMiddle x y =
     let
         thickness =
-            14
+            5
 
         middle =
             floor (gridSize / 2)
