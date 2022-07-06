@@ -135,7 +135,7 @@ maxIter =
 
 gridSize : number
 gridSize =
-    42
+    51
 
 
 cellSize : Float
@@ -236,8 +236,8 @@ drawReactionCircles model r =
 drawFloater : Model -> Vector -> Renderable
 drawFloater model floater =
     shapes
-        [ fill (Color.hsla (toFloat model.count / 1000) 0.5 0.5 0.5) ]
-        [ circle ( floater.x, floater.y ) (cellSize / 2)
+        [ fill (Color.hsla (0.5 + sin (toFloat model.count / 2000)) 0.6 0.9 0.5) ]
+        [ circle ( floater.x, floater.y ) (cellSize * sin (toFloat model.count / 2000))
         ]
 
 
@@ -298,11 +298,11 @@ nextVals model =
 
         gradient x y =
             Vector
-                ((getRight x y reactionArr).uValue
-                    - (getLeft x y reactionArr).uValue
+                ((getRight x y reactionArr).vValue
+                    - (getLeft x y reactionArr).vValue
                 )
-                ((getUp x y reactionArr).uValue
-                    - (getDown x y reactionArr).uValue
+                ((getUp x y reactionArr).vValue
+                    - (getDown x y reactionArr).vValue
                 )
 
         uvv x y =
@@ -418,7 +418,7 @@ seedMiddle : Int -> Int -> ReactionValue
 seedMiddle x y =
     let
         thickness =
-            5
+            20
 
         middle =
             floor (gridSize / 2)
