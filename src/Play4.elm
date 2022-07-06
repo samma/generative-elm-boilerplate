@@ -120,7 +120,7 @@ update msg model =
 
 h : number
 h =
-    900
+    800
 
 
 w : number
@@ -135,7 +135,7 @@ maxIter =
 
 gridSize : number
 gridSize =
-    51
+    55
 
 
 cellSize : Float
@@ -197,17 +197,17 @@ drawItAll model =
         floaters =
             List.map (drawFloater model) model.floaters
 
-        resetToWhite =
+        reset =
             rect ( 0.0, 0.0 ) h h
     in
     shapes
-        [ fill (Color.hsla 1.0 1.0 1.0 1) ]
-        []
-        --:: circs
+        [ fill (Color.hsla 1.0 1.0 0.0 0.01) ]
+        [ reset ]
         :: floaters
 
 
 
+--    floaters
 -- :: circs
 --++ debugLines
 --++ debugLines
@@ -237,7 +237,7 @@ drawFloater : Model -> Vector -> Renderable
 drawFloater model floater =
     shapes
         [ fill (Color.hsla (0.5 + sin (toFloat model.count / 2000)) 0.6 0.9 0.5) ]
-        [ circle ( floater.x, floater.y ) (cellSize * sin (toFloat model.count / 2000))
+        [ circle ( floater.x, floater.y ) 2.0
         ]
 
 
