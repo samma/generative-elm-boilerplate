@@ -78,7 +78,7 @@ init =
       , f = 0.02
       , k = 0.05
       , cells = List.sortWith sortCells (initReactionValues gridSize)
-      , floaters = initFloater gridSize
+      , floaters = initFloaterRandom gridSize
       }
     , Cmd.none
     )
@@ -120,7 +120,7 @@ update msg model =
 
 h : number
 h =
-    800
+    400
 
 
 w : number
@@ -135,7 +135,7 @@ maxIter =
 
 gridSize : number
 gridSize =
-    55
+    49
 
 
 cellSize : Float
@@ -201,7 +201,7 @@ drawItAll model =
             rect ( 0.0, 0.0 ) h h
     in
     shapes
-        [ fill (Color.hsla 1.0 1.0 0.0 0.01) ]
+        [ fill (Color.hsla 1.0 1.0 0.0 1) ]
         [ reset ]
         :: floaters
 
@@ -236,8 +236,8 @@ drawReactionCircles model r =
 drawFloater : Model -> Vector -> Renderable
 drawFloater model floater =
     shapes
-        [ fill (Color.hsla (0.5 + sin (toFloat model.count / 2000)) 0.6 0.9 0.5) ]
-        [ circle ( floater.x, floater.y ) 2.0
+        [ fill (Color.hsla (0.5 + sin (toFloat model.count / 2000)) 0.6 0.9 0.05) ]
+        [ circle ( floater.x, floater.y ) 1.5
         ]
 
 
@@ -351,8 +351,14 @@ nextFloater model floater =
                 (v.x * -1)
                 (v.y * -1)
 
+        distanceFromNode v =
+            0.0001 + sqrt ((v.x * v.x) + (v.y * v.y))
+
+        getGradient location =
+            normalize (getCenter (floor (middleAdjust + (location.x / cellSize))) (floor (middleAdjust + (location.y / cellSize))) (fromList model.cells)).gradient
+
         perpVec location =
-            perpendicular (normalize (getCenter (floor (middleAdjust + (location.x / cellSize))) (floor (middleAdjust + (location.y / cellSize))) (fromList model.cells)).gradient)
+            perpendicular (getGradient location)
 
         perpendicularMovement =
             invert (perpVec floater)
@@ -397,6 +403,22 @@ initFloater n =
     Grid.fold2d
         { rows = n, cols = n }
         (\( x, y ) result -> Vector ((toFloat x + 0.5) * 2 * cellSize) ((toFloat y + 0.5) * 2 * cellSize) :: result)
+        []
+
+
+initFloaterRandom : Int -> List Vector
+initFloaterRandom n =
+    let
+        noiseStrength =
+            5
+    in
+    Grid.fold2d
+        { rows = n, cols = n }
+        (\( x, y ) result ->
+            Vector (cellSize * (toFloat x + (noiseStrength * noise (toFloat x) (toFloat y))))
+                (cellSize * (toFloat y + (noiseStrength * noise (toFloat x) (toFloat y))))
+                :: result
+        )
         []
 
 
