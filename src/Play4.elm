@@ -13,6 +13,7 @@ import Color exposing (Color)
 import Grid exposing (fold2d)
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (onClick)
 import List.Extra exposing (..)
 import Random exposing (..)
 import Random.Extra exposing (result)
@@ -28,11 +29,13 @@ type alias Model =
     , f : Float
     , cells : List ReactionValue
     , floaters : List Vector
+    , drawField : Bool
     }
 
 
 type Msg
     = AnimationFrame Posix
+    | SwapMode
 
 
 type alias ReactionValue =
@@ -79,6 +82,7 @@ init =
       , k = 0.05
       , cells = List.sortWith sortCells (initReactionValues gridSize)
       , floaters = initFloaterRandom gridSize
+      , drawField = False
       }
     , Cmd.none
     )
@@ -116,6 +120,11 @@ update msg model =
 
             else
                 ( model, Cmd.none )
+
+        SwapMode ->
+            ( { model | drawField = not model.drawField }
+            , Cmd.none
+            )
 
 
 h : number
@@ -166,7 +175,10 @@ view : Model -> Html Msg
 view model =
     Canvas.toHtml
         ( w, h )
-        [ style "backgroundColor" "black"
+        [ style "backgroundColor"
+            "black"
+        , onClick
+            SwapMode
         ]
         (drawItAll
             model
@@ -200,10 +212,17 @@ drawItAll model =
         reset =
             rect ( 0.0, 0.0 ) h h
     in
-    shapes
-        [ fill (Color.hsla 1.0 1.0 0.0 1) ]
-        [ reset ]
-        :: floaters
+    if model.drawField then
+        shapes
+            [ fill (Color.hsla 1.0 1.0 0.0 1) ]
+            [ reset ]
+            :: circs
+
+    else
+        shapes
+            [ fill (Color.hsla 1.0 1.0 0.0 1) ]
+            [ reset ]
+            :: floaters
 
 
 
