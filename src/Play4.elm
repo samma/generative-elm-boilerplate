@@ -86,8 +86,8 @@ init : ( Model, Cmd Msg )
 init =
     ( { seed = Random.initialSeed (floor (42 * 10000))
       , count = 0
-      , f = 0.025
-      , k = 0.056
+      , f = 0.02
+      , k = 0.05
       , cells = List.sortWith sortCells (initReactionValues gridSize)
       , floaters = initFloaterRandom gridSize
       , drawField = False
@@ -137,7 +137,7 @@ update msg model =
 
 h : number
 h =
-    1000
+    500
 
 
 w : number
@@ -152,7 +152,7 @@ maxIter =
 
 gridSize : number
 gridSize =
-    51
+    35
 
 
 cellSize : Float
@@ -223,17 +223,18 @@ drawItAll model =
     if model.drawField then
         shapes
             [ fill (Color.hsla 1.0 1.0 0.0 1) ]
-            [ reset ]
+            []
             :: fieldCircles
 
     else
         shapes
-            [ fill (Color.hsla 1.0 1.0 0.0 0.01) ]
+            [ fill (Color.hsla 0.5 0.2 0.2 0.1) ]
             [ reset ]
             :: floaters
 
 
 
+--++ fieldCircles
 --    floaters
 -- :: circs
 --++ debugLines
@@ -267,8 +268,8 @@ sineMod model =
 drawFloater : Model -> Vector -> Renderable
 drawFloater model floater =
     shapes
-        [ fill (Color.hsla 0.1 0.5 0.5 0.1) ]
-        [ circle ( floater.x, floater.y ) 10
+        [ fill (Color.hsla 1 1 1 0.9) ]
+        [ circle ( floater.x, floater.y ) 2
         ]
 
 
@@ -328,9 +329,8 @@ nextVals model =
                 - (4 * (getCenter x y reactionArr).vValue)
 
         scaledVal x y r =
-            r
+            scaleReactionValsToColor r 0.01 0.1
 
-        --scaleReactionValsToColor r 0.05 0.3
         gradient x y =
             Vector
                 ((scaledVal x y (getRight x y reactionArr).vValue
@@ -403,7 +403,7 @@ nextFloater model floater =
             perpendicular (getGradient location)
 
         perpendicularMovement =
-            normalize (invert (perpVec floater))
+            invert (perpVec floater)
 
         normalize v =
             Vector
@@ -412,7 +412,7 @@ nextFloater model floater =
                 (v.y / (0.0001 + sqrt ((v.x * v.x) + (v.y * v.y))))
 
         floaterSpeed =
-            10
+            5
 
         stayInsideBorders v =
             Vector
@@ -476,7 +476,7 @@ initFloaterRandom n =
             0
 
         numScale =
-            2
+            1
     in
     Grid.fold2d
         { rows = n // numScale, cols = n // numScale }
