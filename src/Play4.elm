@@ -228,7 +228,7 @@ drawItAll model =
 
     else
         shapes
-            [ fill (Color.hsla 1.0 1.0 0.0 0.0001) ]
+            [ fill (Color.hsla 1.0 1.0 0.0 0.01) ]
             [ reset ]
             :: floaters
 
@@ -267,7 +267,7 @@ sineMod model =
 drawFloater : Model -> Vector -> Renderable
 drawFloater model floater =
     shapes
-        [ fill (Color.hsla (sineMod model) 0.5 0.5 0.5) ]
+        [ fill (Color.hsla 0.1 0.5 0.5 0.1) ]
         [ circle ( floater.x, floater.y ) 10
         ]
 
@@ -412,7 +412,7 @@ nextFloater model floater =
                 (v.y / (0.0001 + sqrt ((v.x * v.x) + (v.y * v.y))))
 
         floaterSpeed =
-            50
+            10
 
         stayInsideBorders v =
             Vector
