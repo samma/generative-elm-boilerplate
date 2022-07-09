@@ -86,7 +86,7 @@ init : ( Model, Cmd Msg )
 init =
     ( { seed = Random.initialSeed (floor (42 * 10000))
       , count = 0
-      , f = 0.02
+      , f = 0.023
       , k = 0.05
       , cells = List.sortWith sortCells (initReactionValues gridSize)
       , floaters = initFloaterRandom gridSize
@@ -228,7 +228,7 @@ drawItAll model =
 
     else
         shapes
-            [ fill (Color.hsla 0.5 0.2 0.2 0.1) ]
+            [ fill (Color.hsla 0.5 0.2 0.2 0.01) ]
             [ reset ]
             :: floaters
 
@@ -403,7 +403,7 @@ nextFloater model floater =
             perpendicular (getGradient location)
 
         perpendicularMovement =
-            invert (perpVec floater)
+            normalize (invert (perpVec floater))
 
         normalize v =
             Vector
@@ -412,14 +412,14 @@ nextFloater model floater =
                 (v.y / (0.0001 + sqrt ((v.x * v.x) + (v.y * v.y))))
 
         floaterSpeed =
-            5
+            1
 
         stayInsideBorders v =
             Vector
                 (if v.x < 0 then
                     h
 
-                 else if v.x > h then
+                 else if v.x >= h then
                     0
 
                  else
@@ -457,7 +457,7 @@ initReactionValues : Int -> List ReactionValue
 initReactionValues n =
     Grid.fold2d
         { rows = n, cols = n }
-        (\( x, y ) result -> seedMiddle x y :: result)
+        (\( x, y ) result -> noiseSeeding x y :: result)
         []
 
 
