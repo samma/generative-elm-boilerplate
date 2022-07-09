@@ -86,8 +86,8 @@ init : ( Model, Cmd Msg )
 init =
     ( { seed = Random.initialSeed (floor (42 * 10000))
       , count = 0
-      , f = 0.02
-      , k = 0.05
+      , f = 0.025
+      , k = 0.056
       , cells = List.sortWith sortCells (initReactionValues gridSize)
       , floaters = initFloaterRandom gridSize
       , drawField = False
@@ -137,7 +137,7 @@ update msg model =
 
 h : number
 h =
-    400
+    1000
 
 
 w : number
@@ -152,7 +152,7 @@ maxIter =
 
 gridSize : number
 gridSize =
-    49
+    31
 
 
 cellSize : Float
@@ -228,7 +228,7 @@ drawItAll model =
 
     else
         shapes
-            [ fill (Color.hsla 1.0 1.0 0.0 0.01) ]
+            [ fill (Color.hsla 1.0 1.0 0.0 0.0001) ]
             [ reset ]
             :: floaters
 
@@ -260,11 +260,15 @@ drawReactionCircles model r =
 --[ rect ( toFloat r.x * cellSize, toFloat r.y * cellSize ) cellSize cellSize ]
 
 
+sineMod model =
+    0.5 + sin (toFloat model.count / 2000) / 2
+
+
 drawFloater : Model -> Vector -> Renderable
 drawFloater model floater =
     shapes
-        [ fill (Color.hsla (0.5 + sin (toFloat model.count / 2000)) 0.6 0.9 0.5) ]
-        [ circle ( floater.x, floater.y ) 1
+        [ fill (Color.hsla (sineMod model) 0.5 0.5 0.5) ]
+        [ circle ( floater.x, floater.y ) 10
         ]
 
 
@@ -324,15 +328,20 @@ nextVals model =
                 - (4 * (getCenter x y reactionArr).vValue)
 
         scaledVal x y r =
-            scaleReactionValsToColor r 0.05 0.3
+            r
 
+        --scaleReactionValsToColor r 0.05 0.3
         gradient x y =
             Vector
-                (scaledVal x y (getRight x y reactionArr).vValue
+                ((scaledVal x y (getRight x y reactionArr).vValue
                     - scaledVal x y (getLeft x y reactionArr).vValue
+                 )
+                    / 2
                 )
-                (scaledVal x y (getDown x y reactionArr).vValue
+                ((scaledVal x y (getDown x y reactionArr).vValue
                     - scaledVal x y (getUp x y reactionArr).vValue
+                 )
+                    / 2
                 )
 
         uvv x y =
@@ -394,7 +403,7 @@ nextFloater model floater =
             perpendicular (getGradient location)
 
         perpendicularMovement =
-            perpVec floater
+            invert (perpVec floater)
 
         normalize v =
             Vector
@@ -403,9 +412,30 @@ nextFloater model floater =
                 (v.y / (0.0001 + sqrt ((v.x * v.x) + (v.y * v.y))))
 
         floaterSpeed =
-            5
+            50
+
+        stayInsideBorders v =
+            Vector
+                (if v.x < 0 then
+                    h
+
+                 else if v.x > h then
+                    0
+
+                 else
+                    v.x
+                )
+                (if v.y < 0 then
+                    h
+
+                 else if v.y > h then
+                    0
+
+                 else
+                    v.y
+                )
     in
-    Vector (floater.x + (floaterSpeed * perpendicularMovement.x)) (floater.y + (floaterSpeed * perpendicularMovement.y))
+    stayInsideBorders (Vector (floater.x + (floaterSpeed * perpendicularMovement.x)) (floater.y + (floaterSpeed * perpendicularMovement.y)))
 
 
 indexToCoord : Int -> ( Int, Int )
@@ -443,13 +473,16 @@ initFloaterRandom : Int -> List Vector
 initFloaterRandom n =
     let
         noiseStrength =
-            5
+            0
+
+        numScale =
+            1
     in
     Grid.fold2d
-        { rows = n, cols = n }
+        { rows = n // numScale, cols = n // numScale }
         (\( x, y ) result ->
-            Vector (cellSize * (toFloat x + (noiseStrength * noise (toFloat x) (toFloat y))))
-                (cellSize * (toFloat y + (noiseStrength * noise (toFloat x) (toFloat y))))
+            Vector (numScale * cellSize * (toFloat x + (noiseStrength * noise (toFloat x) (toFloat y))))
+                (numScale * cellSize * (toFloat y + (noiseStrength * noise (toFloat x) (toFloat y))))
                 :: result
         )
         []
