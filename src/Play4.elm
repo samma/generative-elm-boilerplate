@@ -152,7 +152,7 @@ maxIter =
 
 gridSize : number
 gridSize =
-    31
+    51
 
 
 cellSize : Float
@@ -403,7 +403,7 @@ nextFloater model floater =
             perpendicular (getGradient location)
 
         perpendicularMovement =
-            invert (perpVec floater)
+            normalize (invert (perpVec floater))
 
         normalize v =
             Vector
@@ -476,7 +476,7 @@ initFloaterRandom n =
             0
 
         numScale =
-            1
+            2
     in
     Grid.fold2d
         { rows = n // numScale, cols = n // numScale }
@@ -506,7 +506,7 @@ seedMiddle : Int -> Int -> ReactionValue
 seedMiddle x y =
     let
         thickness =
-            10
+            2
 
         middle =
             floor (gridSize / 2)
