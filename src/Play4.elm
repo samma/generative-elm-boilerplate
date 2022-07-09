@@ -44,6 +44,8 @@ type alias ReactionValue =
     , uValue : Float
     , vValue : Float
     , gradient : Vector
+    , prevuValue : Float
+    , prevvValue : Float
     }
 
 
@@ -53,14 +55,20 @@ type alias Vector =
     }
 
 
-rVal : a -> b -> c -> d -> Vector -> { x : a, y : b, uValue : c, vValue : d, gradient : Vector }
+
+-- yes yes I know.
+
+
+rVal : a -> b -> c -> d -> Vector -> Float -> Float -> { x : a, y : b, uValue : c, vValue : d, gradient : Vector, prevuValue : Float, prevvValue : Float }
 rVal =
-    \x y u v g ->
+    \x y u v g pu pv ->
         { x = x
         , y = y
         , uValue = u
         , vValue = v
         , gradient = g
+        , prevuValue = pu
+        , prevvValue = pv
         }
 
 
@@ -168,7 +176,7 @@ diff_v =
 
 
 getCenter x y arr =
-    Maybe.withDefault (rVal x y 0.0 0.0 (Vector 0 0)) (get (coordToIndex ( x, y )) arr)
+    Maybe.withDefault (rVal x y 0.0 0.0 (Vector 0 0) 0 0) (get (coordToIndex ( x, y )) arr)
 
 
 view : Model -> Html Msg
@@ -346,7 +354,7 @@ nextVals model =
                 * delta_t
 
         nextVal r =
-            rVal r.x r.y (r.uValue + next_u r.x r.y) (r.vValue + next_v r.x r.y) (gradient r.x r.y)
+            rVal r.x r.y (r.uValue + next_u r.x r.y) (r.vValue + next_v r.x r.y) (gradient r.x r.y) r.uValue r.vValue
 
         -- Set the right gradient value here.
     in
@@ -443,32 +451,32 @@ initFloaterRandom n =
 
 noiseSeeding : Int -> Int -> ReactionValue
 noiseSeeding x y =
-    rVal x y (2.0 * noise (toFloat x) (toFloat y)) (0.3 * noise (toFloat x) (toFloat y)) (Vector 0 0)
+    rVal x y (2.0 * noise (toFloat x) (toFloat y)) (0.3 * noise (toFloat x) (toFloat y)) (Vector 0 0) 0 0
 
 
 seedCorner : Int -> Int -> ReactionValue
 seedCorner x y =
     if x < 10 && y < 10 then
-        rVal x y (Tuple.first defaultReactionValue) (Tuple.second defaultReactionValue) (Vector 0 0)
+        rVal x y (Tuple.first defaultReactionValue) (Tuple.second defaultReactionValue) (Vector 0 0) 0 0
 
     else
-        rVal x y 1 0 (Vector 0 0)
+        rVal x y 1 0 (Vector 0 0) 0 0
 
 
 seedMiddle : Int -> Int -> ReactionValue
 seedMiddle x y =
     let
         thickness =
-            20
+            10
 
         middle =
             floor (gridSize / 2)
     in
     if x < (middle + thickness) && x > (middle - thickness) && y < (middle + thickness) && y > (middle - thickness) then
-        rVal x y (Tuple.first defaultReactionValue) (Tuple.second defaultReactionValue) (Vector 0 0)
+        rVal x y (Tuple.first defaultReactionValue) (Tuple.second defaultReactionValue) (Vector 0 0) 0 0
 
     else
-        rVal x y 1.0 0.0 (Vector 0 0)
+        rVal x y 1.0 0.0 (Vector 0 0) 0 0
 
 
 
