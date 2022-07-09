@@ -208,7 +208,7 @@ iterateModel model =
 drawItAll : Model -> List Renderable
 drawItAll model =
     let
-        circs =
+        fieldCircles =
             List.map (drawReactionCircles model) model.cells
 
         debugLines =
@@ -224,11 +224,11 @@ drawItAll model =
         shapes
             [ fill (Color.hsla 1.0 1.0 0.0 1) ]
             [ reset ]
-            :: circs
+            :: fieldCircles
 
     else
         shapes
-            [ fill (Color.hsla 1.0 1.0 0.0 1) ]
+            [ fill (Color.hsla 1.0 1.0 0.0 0.01) ]
             [ reset ]
             :: floaters
 
@@ -263,8 +263,8 @@ drawReactionCircles model r =
 drawFloater : Model -> Vector -> Renderable
 drawFloater model floater =
     shapes
-        [ fill (Color.hsla (0.5 + sin (toFloat model.count / 2000)) 0.6 0.9 0.05) ]
-        [ circle ( floater.x, floater.y ) 1.5
+        [ fill (Color.hsla (0.5 + sin (toFloat model.count / 2000)) 0.6 0.9 0.5) ]
+        [ circle ( floater.x, floater.y ) 1
         ]
 
 
@@ -325,11 +325,13 @@ nextVals model =
 
         gradient x y =
             Vector
-                ((getRight x y reactionArr).vValue
-                    - (getLeft x y reactionArr).vValue
+                ((getCenter x y reactionArr).vValue
+                    - (getRight x y reactionArr).vValue
+                    + (getLeft x y reactionArr).vValue
                 )
-                ((getUp x y reactionArr).vValue
+                ((getCenter x y reactionArr).vValue
                     - (getDown x y reactionArr).vValue
+                    + (getUp x y reactionArr).vValue
                 )
 
         uvv x y =
@@ -381,14 +383,17 @@ nextFloater model floater =
         distanceFromNode v =
             0.0001 + sqrt ((v.x * v.x) + (v.y * v.y))
 
+        getReactionOfLocation location =
+            getCenter (floor (middleAdjust + (location.x / cellSize))) (floor (middleAdjust + (location.y / cellSize))) (fromList model.cells)
+
         getGradient location =
-            normalize (getCenter (floor (middleAdjust + (location.x / cellSize))) (floor (middleAdjust + (location.y / cellSize))) (fromList model.cells)).gradient
+            (getReactionOfLocation location).gradient
 
         perpVec location =
             perpendicular (getGradient location)
 
         perpendicularMovement =
-            invert (perpVec floater)
+            perpVec floater
 
         normalize v =
             Vector
