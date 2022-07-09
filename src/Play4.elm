@@ -328,13 +328,11 @@ nextVals model =
 
         gradient x y =
             Vector
-                (scaledVal x y (getCenter x y reactionArr).vValue
-                    - scaledVal x y (getRight x y reactionArr).vValue
-                    + scaledVal x y (getLeft x y reactionArr).vValue
+                (scaledVal x y (getRight x y reactionArr).vValue
+                    - scaledVal x y (getLeft x y reactionArr).vValue
                 )
-                (scaledVal x y (getCenter x y reactionArr).vValue
-                    - scaledVal x y (getDown x y reactionArr).vValue
-                    + scaledVal x y (getUp x y reactionArr).vValue
+                (scaledVal x y (getDown x y reactionArr).vValue
+                    - scaledVal x y (getUp x y reactionArr).vValue
                 )
 
         uvv x y =
