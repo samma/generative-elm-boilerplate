@@ -323,15 +323,18 @@ nextVals model =
                 + (getDown x y reactionArr).vValue
                 - (4 * (getCenter x y reactionArr).vValue)
 
+        scaledVal x y r =
+            scaleReactionValsToColor r 0.05 0.3
+
         gradient x y =
             Vector
-                ((getCenter x y reactionArr).vValue
-                    - (getRight x y reactionArr).vValue
-                    + (getLeft x y reactionArr).vValue
+                (scaledVal x y (getCenter x y reactionArr).vValue
+                    - scaledVal x y (getRight x y reactionArr).vValue
+                    + scaledVal x y (getLeft x y reactionArr).vValue
                 )
-                ((getCenter x y reactionArr).vValue
-                    - (getDown x y reactionArr).vValue
-                    + (getUp x y reactionArr).vValue
+                (scaledVal x y (getCenter x y reactionArr).vValue
+                    - scaledVal x y (getDown x y reactionArr).vValue
+                    + scaledVal x y (getUp x y reactionArr).vValue
                 )
 
         uvv x y =
