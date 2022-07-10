@@ -194,7 +194,7 @@ maxIter =
 
 gridSize : number
 gridSize =
-    35
+    45
 
 
 cellSize : Float
@@ -268,9 +268,10 @@ drawItAll model =
     in
     if model.drawField then
         shapes
-            [ fill (Color.hsla 1.0 1.0 0.0 1) ]
-            []
+            [ fill (Color.hsla 0.5 0.2 0.2 0.005) ]
+            [ reset ]
             :: fieldCircles
+            ++ floaters
 
     else
         shapes
@@ -296,8 +297,8 @@ drawReactionCircles model r =
             scaleReactionValsToColor r.vValue 0.05 0.3
     in
     shapes
-        [ fill (Color.hsla 0.2 0.5 0.5 scaledValue) ]
-        [ circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (cellSize * abs scaledValue / 5)
+        [ fill (Color.hsla 0.2 0.5 0.0 scaledValue) ]
+        [ circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (cellSize * abs scaledValue / 2)
         ]
 
 
@@ -336,7 +337,7 @@ drawFloater : Model -> Vector -> Renderable
 drawFloater model floater =
     shapes
         [ fill (Color.hsla 1 1 1 0.9) ]
-        [ circle ( floater.x, floater.y ) (clampMod (floaterSizeMod model) 0.1 5)
+        [ circle ( floater.x, floater.y ) (clampMod (floaterSizeMod model) 0.1 2)
         ]
 
 
@@ -447,18 +448,14 @@ nextFloaters model =
 
 nextFloater : Model -> Vector -> Vector
 nextFloater model floater =
-    -- TODO think this a bit more through. Need to assoiate the floater with the correct cell.
     let
         middleAdjust =
-            0
+            0.5
 
         invert v =
             Vector
                 (v.x * -1)
                 (v.y * -1)
-
-        distanceFromNode v =
-            0.0001 + sqrt ((v.x * v.x) + (v.y * v.y))
 
         getReactionOfLocation location =
             getCenter (floor (middleAdjust + (location.x / cellSize))) (floor (middleAdjust + (location.y / cellSize))) (fromList model.cells)
@@ -540,13 +537,13 @@ initFloaterRandom : Int -> List Vector
 initFloaterRandom n =
     let
         noiseStrength =
-            6
+            0
 
         numScale =
-            1
+            0.5
     in
     Grid.fold2d
-        { rows = n * numScale, cols = n * numScale }
+        { rows = floor (toFloat n * numScale), cols = floor (toFloat n * numScale) }
         (\( x, y ) result ->
             Vector (cellSize / numScale * (toFloat x + (noiseStrength * noise (toFloat x) (toFloat y))))
                 (cellSize / numScale * (toFloat y + (noiseStrength * noise (toFloat x) (toFloat y))))
