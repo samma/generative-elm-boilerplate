@@ -32,6 +32,8 @@ type alias Model =
     , floaters : List Vector
     , drawField : Bool
     , f_slider : SingleSlider.SingleSlider Msg
+    , floater_speed_slider : SingleSlider.SingleSlider Msg
+    , floater_speed : Float
     }
 
 
@@ -39,6 +41,7 @@ type Msg
     = AnimationFrame Posix
     | SwapMode
     | FSliderChange Float
+    | FloaterSpeedChange Float
 
 
 type alias ReactionValue =
@@ -74,25 +77,46 @@ init =
         f_valueFormatter =
             \value _ -> "F: " ++ String.fromFloat value
 
+        floater_speed_valueFormatter =
+            \value _ -> "Floater speed: " ++ String.fromFloat value
+
         noFormat =
             \value -> ""
+
+        initialFloaterSpeed =
+            5
+
+        initial_f_value =
+            0.023
     in
     ( { seed = Random.initialSeed (floor (42 * 10000))
       , count = 0
-      , f_reaction = 0.023
+      , f_reaction = initial_f_value
       , k_reaction = 0.055
       , cells = List.sortWith sortCells (initReactionValues gridSize)
       , floaters = initFloaterRandom gridSize
       , drawField = False
+      , floater_speed = initialFloaterSpeed
       , f_slider =
             SingleSlider.init
                 { min = 0.02
                 , max = 0.055
-                , value = 0.023
+                , value = initial_f_value
                 , step = 0.001
                 , onChange = FSliderChange
                 }
                 |> SingleSlider.withValueFormatter f_valueFormatter
+                |> SingleSlider.withMinFormatter noFormat
+                |> SingleSlider.withMaxFormatter noFormat
+      , floater_speed_slider =
+            SingleSlider.init
+                { min = 0.1
+                , max = 100.0
+                , value = initialFloaterSpeed
+                , step = 0.1
+                , onChange = FloaterSpeedChange
+                }
+                |> SingleSlider.withValueFormatter floater_speed_valueFormatter
                 |> SingleSlider.withMinFormatter noFormat
                 |> SingleSlider.withMaxFormatter noFormat
       }
@@ -144,6 +168,13 @@ update msg model =
                     SingleSlider.update sliderValue model.f_slider
             in
             ( { model | f_slider = newSlider, f_reaction = sliderValue }, Cmd.none )
+
+        FloaterSpeedChange sliderValue ->
+            let
+                newSlider =
+                    SingleSlider.update sliderValue model.floater_speed_slider
+            in
+            ( { model | floater_speed_slider = newSlider, floater_speed = sliderValue }, Cmd.none )
 
 
 h : number
@@ -204,6 +235,7 @@ view model =
                 model
             )
         , div [] [ SingleSlider.view model.f_slider ]
+        , div [] [ SingleSlider.view model.floater_speed_slider ]
         ]
 
 
@@ -438,7 +470,7 @@ nextFloater model floater =
             perpendicular (getGradient location)
 
         perpendicularMovement =
-            invert (perpVec floater)
+            normalize (invert (perpVec floater))
 
         normalize v =
             Vector
@@ -447,7 +479,7 @@ nextFloater model floater =
                 (v.y / (0.0001 + sqrt ((v.x * v.x) + (v.y * v.y))))
 
         floaterSpeed =
-            20
+            model.floater_speed
 
         stayInsideBorders v =
             Vector
