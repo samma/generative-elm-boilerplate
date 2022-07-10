@@ -87,7 +87,7 @@ init =
             5
 
         initial_f_value =
-            0.023
+            0.029
     in
     ( { seed = Random.initialSeed (floor (42 * 10000))
       , count = 0
@@ -297,7 +297,7 @@ drawReactionCircles model r =
             scaleReactionValsToColor r.vValue 0.01 0.5
     in
     shapes
-        [ fill (Color.hsla 0.7 0.5 scaledValue scaledValue) ]
+        [ fill (Color.hsla 1 0.5 scaledValue scaledValue) ]
         [ circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (cellSize * abs scaledValue)
         ]
 
@@ -336,8 +336,10 @@ clampMod value min max =
 drawFloater : Model -> Vector -> Renderable
 drawFloater model floater =
     shapes
-        [ fill (Color.hsla 0.1 0.7 0.5 0.9) ]
+        [ fill (Color.hsla 1 0.7 0.5 0.9) ]
         [ circle ( floater.x, floater.y ) (clampMod (floaterSizeMod model) 0.1 7)
+
+        --arc ( floater.x, floater.y ) 40 { startAngle = degrees 15, endAngle = degrees 85, clockwise = True }
         ]
 
 
