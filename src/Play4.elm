@@ -228,7 +228,7 @@ drawItAll model =
 
     else
         shapes
-            [ fill (Color.hsla 0.5 0.2 0.2 0.01) ]
+            [ fill (Color.hsla 0.5 0.2 0.2 0.005) ]
             [ reset ]
             :: floaters
 
@@ -267,7 +267,11 @@ sineMod model =
 
 floaterSizeMod : Model -> Float
 floaterSizeMod model =
-    0.5 + abs (sin (toFloat model.count / 100)) / 2
+    10
+
+
+
+--0.5 + abs (sin (toFloat model.count / 10))
 
 
 clampMod value min max =
@@ -400,7 +404,7 @@ nextFloater model floater =
     -- TODO think this a bit more through. Need to assoiate the floater with the correct cell.
     let
         middleAdjust =
-            10
+            0
 
         invert v =
             Vector
@@ -429,7 +433,7 @@ nextFloater model floater =
                 (v.y / (0.0001 + sqrt ((v.x * v.x) + (v.y * v.y))))
 
         floaterSpeed =
-            50
+            20
 
         stayInsideBorders v =
             Vector
@@ -474,7 +478,7 @@ initReactionValues : Int -> List ReactionValue
 initReactionValues n =
     Grid.fold2d
         { rows = n, cols = n }
-        (\( x, y ) result -> noiseSeeding x y :: result)
+        (\( x, y ) result -> seedMiddle x y :: result)
         []
 
 
@@ -490,10 +494,10 @@ initFloaterRandom : Int -> List Vector
 initFloaterRandom n =
     let
         noiseStrength =
-            0
+            6
 
         numScale =
-            2
+            1
     in
     Grid.fold2d
         { rows = n * numScale, cols = n * numScale }
