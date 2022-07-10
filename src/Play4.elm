@@ -137,7 +137,7 @@ update msg model =
 
 h : number
 h =
-    500
+    1000
 
 
 w : number
@@ -262,14 +262,31 @@ drawReactionCircles model r =
 
 
 sineMod model =
-    0.5 + sin (toFloat model.count / 2000) / 2
+    0.5 + sin (toFloat model.count / 200) / 2
+
+
+floaterSizeMod : Model -> Float
+floaterSizeMod model =
+    0.5 + abs (sin (toFloat model.count / 100)) / 2
+
+
+clampMod value min max =
+    -- Drawing circles with negative radius causes js to stop.
+    if value < min then
+        min
+
+    else if value > max then
+        max
+
+    else
+        value
 
 
 drawFloater : Model -> Vector -> Renderable
 drawFloater model floater =
     shapes
         [ fill (Color.hsla 1 1 1 0.9) ]
-        [ circle ( floater.x, floater.y ) 2
+        [ circle ( floater.x, floater.y ) (clampMod (floaterSizeMod model) 0.1 5)
         ]
 
 
@@ -383,7 +400,7 @@ nextFloater model floater =
     -- TODO think this a bit more through. Need to assoiate the floater with the correct cell.
     let
         middleAdjust =
-            0.5
+            10
 
         invert v =
             Vector
@@ -403,7 +420,7 @@ nextFloater model floater =
             perpendicular (getGradient location)
 
         perpendicularMovement =
-            normalize (invert (perpVec floater))
+            invert (perpVec floater)
 
         normalize v =
             Vector
@@ -412,7 +429,7 @@ nextFloater model floater =
                 (v.y / (0.0001 + sqrt ((v.x * v.x) + (v.y * v.y))))
 
         floaterSpeed =
-            1
+            50
 
         stayInsideBorders v =
             Vector
@@ -476,13 +493,13 @@ initFloaterRandom n =
             0
 
         numScale =
-            1
+            2
     in
     Grid.fold2d
-        { rows = n // numScale, cols = n // numScale }
+        { rows = n * numScale, cols = n * numScale }
         (\( x, y ) result ->
-            Vector (numScale * cellSize * (toFloat x + (noiseStrength * noise (toFloat x) (toFloat y))))
-                (numScale * cellSize * (toFloat y + (noiseStrength * noise (toFloat x) (toFloat y))))
+            Vector (cellSize / numScale * (toFloat x + (noiseStrength * noise (toFloat x) (toFloat y))))
+                (cellSize / numScale * (toFloat y + (noiseStrength * noise (toFloat x) (toFloat y))))
                 :: result
         )
         []
