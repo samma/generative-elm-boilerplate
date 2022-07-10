@@ -18,6 +18,7 @@ import List.Extra exposing (..)
 import Random exposing (..)
 import Random.Extra exposing (result)
 import Simplex exposing (PermutationTable)
+import SingleSlider exposing (..)
 import Time exposing (Posix)
 import Vector2d exposing (Vector2d)
 
@@ -25,17 +26,19 @@ import Vector2d exposing (Vector2d)
 type alias Model =
     { seed : Random.Seed
     , count : Int
-    , k : Float
-    , f : Float
+    , k_reaction : Float
+    , f_reaction : Float
     , cells : List ReactionValue
     , floaters : List Vector
     , drawField : Bool
+    , singleSlider : SingleSlider.SingleSlider Msg
     }
 
 
 type Msg
     = AnimationFrame Posix
     | SwapMode
+    | SingleSliderChange Float
 
 
 type alias ReactionValue =
@@ -55,23 +58,6 @@ type alias Vector =
     }
 
 
-
--- yes yes I know.
-
-
-rVal : a -> b -> c -> d -> Vector -> Float -> Float -> { x : a, y : b, uValue : c, vValue : d, gradient : Vector, prevuValue : Float, prevvValue : Float }
-rVal =
-    \x y u v g pu pv ->
-        { x = x
-        , y = y
-        , uValue = u
-        , vValue = v
-        , gradient = g
-        , prevuValue = pu
-        , prevvValue = pv
-        }
-
-
 main : Program Float Model Msg
 main =
     Browser.element
@@ -86,11 +72,19 @@ init : ( Model, Cmd Msg )
 init =
     ( { seed = Random.initialSeed (floor (42 * 10000))
       , count = 0
-      , f = 0.023
-      , k = 0.05
+      , f_reaction = 0.023
+      , k_reaction = 0.05
       , cells = List.sortWith sortCells (initReactionValues gridSize)
       , floaters = initFloaterRandom gridSize
       , drawField = False
+      , singleSlider =
+            SingleSlider.init
+                { min = 0.0
+                , max = 1
+                , value = 0.023
+                , step = 0.01
+                , onChange = SingleSliderChange
+                }
       }
     , Cmd.none
     )
@@ -133,6 +127,13 @@ update msg model =
             ( { model | drawField = not model.drawField }
             , Cmd.none
             )
+
+        SingleSliderChange sliderValue ->
+            let
+                newSlider =
+                    SingleSlider.update sliderValue model.singleSlider
+            in
+            ( { model | singleSlider = newSlider, f_reaction = sliderValue }, Cmd.none )
 
 
 h : number
@@ -181,16 +182,19 @@ getCenter x y arr =
 
 view : Model -> Html Msg
 view model =
-    Canvas.toHtml
-        ( w, h )
-        [ style "backgroundColor"
-            "black"
-        , onClick
-            SwapMode
+    div []
+        [ div [] [ SingleSlider.view model.singleSlider ]
+        , Canvas.toHtml
+            ( w, h )
+            [ style "backgroundColor"
+                "black"
+            , onClick
+                SwapMode
+            ]
+            (drawItAll
+                model
+            )
         ]
-        (drawItAll
-            model
-        )
 
 
 iterateModel : Model -> Model
@@ -373,14 +377,14 @@ nextVals model =
         next_u x y =
             ((diff_u * uLap x y)
                 - uvv x y
-                + (model.f * (1 - (getCenter x y reactionArr).uValue))
+                + (model.f_reaction * (1 - (getCenter x y reactionArr).uValue))
             )
                 * delta_t
 
         next_v x y =
             ((diff_v * vLap x y)
                 + uvv x y
-                - ((model.f + model.k)
+                - ((model.f_reaction + model.k_reaction)
                     * (getCenter x y reactionArr).vValue
                   )
             )
@@ -555,3 +559,20 @@ permTable =
 noise : Float -> Float -> Float
 noise =
     Simplex.fractal2d { scale = 1, steps = 4, stepSize = 3.0, persistence = 2.0 } permTable
+
+
+
+-- yes yes I know.
+
+
+rVal : a -> b -> c -> d -> Vector -> Float -> Float -> { x : a, y : b, uValue : c, vValue : d, gradient : Vector, prevuValue : Float, prevvValue : Float }
+rVal =
+    \x y u v g pu pv ->
+        { x = x
+        , y = y
+        , uValue = u
+        , vValue = v
+        , gradient = g
+        , prevuValue = pu
+        , prevvValue = pv
+        }
