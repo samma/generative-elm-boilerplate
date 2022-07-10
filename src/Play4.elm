@@ -95,7 +95,7 @@ init =
       , k_reaction = 0.055
       , cells = List.sortWith sortCells (initReactionValues gridSize)
       , floaters = initFloaterRandom gridSize
-      , drawField = False
+      , drawField = True
       , floater_speed = initialFloaterSpeed
       , f_slider =
             SingleSlider.init
@@ -194,7 +194,7 @@ maxIter =
 
 gridSize : number
 gridSize =
-    45
+    35
 
 
 cellSize : Float
@@ -270,8 +270,8 @@ drawItAll model =
         shapes
             [ fill (Color.hsla 0.5 0.2 0.2 0.005) ]
             [ reset ]
-            :: fieldCircles
-            ++ floaters
+            :: floaters
+            ++ fieldCircles
 
     else
         shapes
@@ -294,11 +294,11 @@ drawReactionCircles : Model -> ReactionValue -> Renderable
 drawReactionCircles model r =
     let
         scaledValue =
-            scaleReactionValsToColor r.vValue 0.05 0.3
+            scaleReactionValsToColor r.vValue 0.01 0.5
     in
     shapes
-        [ fill (Color.hsla 0.2 0.5 0.0 scaledValue) ]
-        [ circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (cellSize * abs scaledValue / 2)
+        [ fill (Color.hsla 0.7 0.5 scaledValue scaledValue) ]
+        [ circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (cellSize * abs scaledValue)
         ]
 
 
@@ -336,8 +336,8 @@ clampMod value min max =
 drawFloater : Model -> Vector -> Renderable
 drawFloater model floater =
     shapes
-        [ fill (Color.hsla 1 1 1 0.9) ]
-        [ circle ( floater.x, floater.y ) (clampMod (floaterSizeMod model) 0.1 2)
+        [ fill (Color.hsla 0.1 0.7 0.5 0.9) ]
+        [ circle ( floater.x, floater.y ) (clampMod (floaterSizeMod model) 0.1 7)
         ]
 
 
@@ -467,7 +467,7 @@ nextFloater model floater =
             perpendicular (getGradient location)
 
         perpendicularMovement =
-            normalize (invert (perpVec floater))
+            invert (perpVec floater)
 
         normalize v =
             Vector
@@ -540,7 +540,7 @@ initFloaterRandom n =
             0
 
         numScale =
-            0.5
+            1
     in
     Grid.fold2d
         { rows = floor (toFloat n * numScale), cols = floor (toFloat n * numScale) }
