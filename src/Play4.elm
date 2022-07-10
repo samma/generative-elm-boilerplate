@@ -31,14 +31,14 @@ type alias Model =
     , cells : List ReactionValue
     , floaters : List Vector
     , drawField : Bool
-    , singleSlider : SingleSlider.SingleSlider Msg
+    , f_slider : SingleSlider.SingleSlider Msg
     }
 
 
 type Msg
     = AnimationFrame Posix
     | SwapMode
-    | SingleSliderChange Float
+    | FSliderChange Float
 
 
 type alias ReactionValue =
@@ -70,21 +70,31 @@ main =
 
 init : ( Model, Cmd Msg )
 init =
+    let
+        f_valueFormatter =
+            \value _ -> "F: " ++ String.fromFloat value
+
+        noFormat =
+            \value -> ""
+    in
     ( { seed = Random.initialSeed (floor (42 * 10000))
       , count = 0
       , f_reaction = 0.023
-      , k_reaction = 0.05
+      , k_reaction = 0.055
       , cells = List.sortWith sortCells (initReactionValues gridSize)
       , floaters = initFloaterRandom gridSize
       , drawField = False
-      , singleSlider =
+      , f_slider =
             SingleSlider.init
-                { min = 0.0
-                , max = 1
+                { min = 0.02
+                , max = 0.055
                 , value = 0.023
-                , step = 0.01
-                , onChange = SingleSliderChange
+                , step = 0.001
+                , onChange = FSliderChange
                 }
+                |> SingleSlider.withValueFormatter f_valueFormatter
+                |> SingleSlider.withMinFormatter noFormat
+                |> SingleSlider.withMaxFormatter noFormat
       }
     , Cmd.none
     )
@@ -128,12 +138,12 @@ update msg model =
             , Cmd.none
             )
 
-        SingleSliderChange sliderValue ->
+        FSliderChange sliderValue ->
             let
                 newSlider =
-                    SingleSlider.update sliderValue model.singleSlider
+                    SingleSlider.update sliderValue model.f_slider
             in
-            ( { model | singleSlider = newSlider, f_reaction = sliderValue }, Cmd.none )
+            ( { model | f_slider = newSlider, f_reaction = sliderValue }, Cmd.none )
 
 
 h : number
@@ -183,8 +193,7 @@ getCenter x y arr =
 view : Model -> Html Msg
 view model =
     div []
-        [ div [] [ SingleSlider.view model.singleSlider ]
-        , Canvas.toHtml
+        [ Canvas.toHtml
             ( w, h )
             [ style "backgroundColor"
                 "black"
@@ -194,6 +203,7 @@ view model =
             (drawItAll
                 model
             )
+        , div [] [ SingleSlider.view model.f_slider ]
         ]
 
 
