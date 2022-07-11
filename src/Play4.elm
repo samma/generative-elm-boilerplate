@@ -271,7 +271,7 @@ drawItAll model =
             rect ( 0.0, 0.0 ) h h
 
         col =
-            Color.hsla 0.35 0.5 0.5 0.005
+            Color.hsla (sin (toFloat model.count / 100)) 0.5 0.5 0.005
     in
     if model.drawField then
         shapes
