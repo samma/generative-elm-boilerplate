@@ -84,10 +84,10 @@ init =
             \value -> ""
 
         initialFloaterSpeed =
-            h / gridSize / 2
+            h / gridSize / 5
 
         initial_f_value =
-            0.028
+            0.023
     in
     ( { seed = Random.initialSeed (floor (42 * 10000))
       , count = 0
@@ -310,11 +310,14 @@ drawReactionCircles model r =
 drawFloater : Model -> Vector -> Renderable
 drawFloater model floater =
     shapes
-        [ fill (Color.hsla 1 1 1 1) ]
+        [ fill (Color.hsla 1 1 1 1), stroke (Color.hsla 0.5 0.5 0.5 0.01) ]
         [ circle ( floater.x, floater.y ) (clampMod (floaterSizeMod model) 0.1 100)
-
-        --arc ( floater.x, floater.y ) 40 { startAngle = degrees 15, endAngle = degrees 85, clockwise = True }
+        , path ( floater.x, floater.y ) [ lineTo ( h / 2, h / 2 ) ]
         ]
+
+
+
+--arc ( floater.x, floater.y ) 40 { startAngle = degrees 15, endAngle = degrees 85, clockwise = True }
 
 
 sineMod model =
@@ -541,7 +544,7 @@ initFloaterRandom n =
             5
 
         numScale =
-            2
+            1
     in
     Grid.fold2d
         { rows = floor (toFloat n * numScale), cols = floor (toFloat n * numScale) }
@@ -589,7 +592,7 @@ seedMiddle x y =
 
 permTable : PermutationTable
 permTable =
-    Simplex.permutationTableFromInt 11
+    Simplex.permutationTableFromInt 13
 
 
 
