@@ -326,7 +326,7 @@ drawFloater model floater =
     in
     shapes
         [ fill (Color.hsla (floater.x / h) 0.7 0.7 1), stroke (Color.hsla 0.5 0.5 0.5 0.1) ]
-        [ circle ( cellSize * isom.x, (cellSize * isom.y) + floaterSizeMod model ) (clampMod (floaterSizeMod model) 0.1 100)
+        [ circle ( cellSize * isom.x, (cellSize * isom.y) + floaterSizeMod model ) (clampMod (floaterSizeMod model) 0.1 2.5)
 
         --circle ( floater.x, floater.y ) (clampMod (floaterSizeMod model) 0.1 100)
         --path ( h / 2, h / 2 ) [ lineTo ( floater.x, floater.y ) ]
@@ -631,7 +631,7 @@ initFloaterRandom n =
             0
 
         numScale =
-            0.6
+            1
     in
     Grid.fold2d
         { rows = floor (toFloat n * numScale), cols = floor (toFloat n * numScale) }
