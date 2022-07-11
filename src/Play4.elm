@@ -270,14 +270,14 @@ drawItAll model =
     in
     if model.drawField then
         shapes
-            [ fill (Color.hsla 0.9 0.2 0.2 0.01) ]
+            [ fill (Color.hsla 0.9 0.5 0.5 0.005) ]
             [ reset ]
             :: fieldCircles
             ++ floaters
 
     else
         shapes
-            [ fill (Color.hsla 0.9 0.2 0.2 0.01) ]
+            [ fill (Color.hsla 0.9 0.5 0.5 0.005) ]
             [ reset ]
             :: floaters
 
@@ -343,11 +343,7 @@ sineMod model =
 
 floaterSizeMod : Model -> Float
 floaterSizeMod model =
-    2
-
-
-
---0.5 + abs (4 * sin (toFloat model.count / 50))
+    0.5 + abs (4 * sin (toFloat model.count / 50))
 
 
 clampMod value min max =
@@ -468,7 +464,7 @@ nextFloaters model =
 
 
 middleAdjust =
-    1
+    5
 
 
 nextFloater : Model -> Vector -> Vector
@@ -611,7 +607,7 @@ initReactionValues : Int -> List ReactionValue
 initReactionValues n =
     Grid.fold2d
         { rows = n, cols = n }
-        (\( x, y ) result -> seedMiddle x y :: result)
+        (\( x, y ) result -> noiseSeeding x y :: result)
         []
 
 
