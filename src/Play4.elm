@@ -87,8 +87,9 @@ init =
             \value -> ""
 
         initialFloaterSpeed =
-            h / gridSize / 8
+            1
 
+        -- h / gridSize / 4
         initial_f_value =
             0.027
     in
@@ -555,8 +556,9 @@ nextFloater model floater =
             { x = avrx, y = avry }
 
         perpVec location =
-            perpendicular (getAveragedGradient location)
+            perpendicular (getGradient location)
 
+        --perpendicular (getAveragedGradient location)
         perpendicularMovement =
             normalize (invert (perpVec floater))
 
