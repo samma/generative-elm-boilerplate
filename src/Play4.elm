@@ -14,6 +14,7 @@ import Grid exposing (fold2d)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+import List exposing (..)
 import List.Extra exposing (..)
 import Random exposing (..)
 import Random.Extra exposing (result)
@@ -268,13 +269,13 @@ drawItAll model =
     in
     if model.drawField then
         shapes
-            [ fill (Color.hsla 0.5 0.2 0.2 0.05) ]
+            [ fill (Color.hsla 0.5 0.2 0.2 0.005) ]
             [ reset ]
             :: floaters
 
     else
         shapes
-            [ fill (Color.hsla 0.5 0.2 0.2 0.05) ]
+            [ fill (Color.hsla 0.5 0.2 0.2 0.005) ]
             [ reset ]
             :: floaters
 
@@ -309,10 +310,14 @@ drawReactionCircles model r =
 
 drawFloater : Model -> Vector -> Renderable
 drawFloater model floater =
+    let
+        potentiallyFirstPoint =
+            Maybe.withDefault { x = 0, y = 0 } (List.head model.floaters)
+    in
     shapes
-        [ fill (Color.hsla 1 1 1 1), stroke (Color.hsla 0.5 0.5 0.5 0.01) ]
-        [ circle ( floater.x, floater.y ) (clampMod (floaterSizeMod model) 0.1 100)
-        , path ( floater.x, floater.y ) [ lineTo ( h / 2, h / 2 ) ]
+        [ fill (Color.hsla 1 1 1 1), stroke (Color.hsla 0.5 0.5 0.5 0.3) ]
+        [ --circle ( floater.x, floater.y ) (clampMod (floaterSizeMod model) 0.1 100)
+          path ( potentiallyFirstPoint.x, potentiallyFirstPoint.y ) [ lineTo ( floater.x, floater.y ) ]
         ]
 
 
@@ -525,7 +530,7 @@ initReactionValues : Int -> List ReactionValue
 initReactionValues n =
     Grid.fold2d
         { rows = n, cols = n }
-        (\( x, y ) result -> seedMiddle x y :: result)
+        (\( x, y ) result -> noiseSeeding x y :: result)
         []
 
 
@@ -544,7 +549,7 @@ initFloaterRandom n =
             5
 
         numScale =
-            1
+            0.5
     in
     Grid.fold2d
         { rows = floor (toFloat n * numScale), cols = floor (toFloat n * numScale) }
