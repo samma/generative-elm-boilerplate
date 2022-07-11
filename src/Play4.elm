@@ -85,10 +85,10 @@ init =
             \value -> ""
 
         initialFloaterSpeed =
-            h / gridSize / 5
+            h / gridSize / 8
 
         initial_f_value =
-            0.023
+            0.027
     in
     ( { seed = Random.initialSeed (floor (42 * 10000))
       , count = 0
@@ -539,7 +539,7 @@ initReactionValues : Int -> List ReactionValue
 initReactionValues n =
     Grid.fold2d
         { rows = n, cols = n }
-        (\( x, y ) result -> seedMiddle x y :: result)
+        (\( x, y ) result -> noiseSeeding x y :: result)
         []
 
 
@@ -558,7 +558,7 @@ initFloaterRandom n =
             5
 
         numScale =
-            0.5
+            0.7
     in
     Grid.fold2d
         { rows = floor (toFloat n * numScale), cols = floor (toFloat n * numScale) }
@@ -606,7 +606,7 @@ seedMiddle x y =
 
 permTable : PermutationTable
 permTable =
-    Simplex.permutationTableFromInt 13
+    Simplex.permutationTableFromInt 15
 
 
 
@@ -637,4 +637,4 @@ rVal =
 
 isometricPoint : Vector -> Vector
 isometricPoint v =
-    Vector (((v.x - v.y) / 2) + (gridSize / 2)) ((v.x + v.y) / 2)
+    Vector (((v.x - v.y) / sqrt 2) + (gridSize / 2)) ((v.x + v.y) / 2)
