@@ -84,10 +84,10 @@ init =
             \value -> ""
 
         initialFloaterSpeed =
-            1.5
+            h / gridSize / 2
 
         initial_f_value =
-            0.033
+            0.028
     in
     ( { seed = Random.initialSeed (floor (42 * 10000))
       , count = 0
@@ -125,7 +125,7 @@ init =
 
 
 defaultReactionValue =
-    ( 0.1, 0.1 )
+    ( 0.5, 0.25 )
 
 
 sortCells a b =
@@ -194,7 +194,7 @@ maxIter =
 
 gridSize : number
 gridSize =
-    45
+    37
 
 
 cellSize : Float
@@ -268,13 +268,13 @@ drawItAll model =
     in
     if model.drawField then
         shapes
-            [ fill (Color.hsla 0.5 0.2 0.2 0.005) ]
+            [ fill (Color.hsla 0.5 0.2 0.2 0.05) ]
             [ reset ]
             :: floaters
 
     else
         shapes
-            [ fill (Color.hsla 0.5 0.2 0.2 0.005) ]
+            [ fill (Color.hsla 0.5 0.2 0.2 0.05) ]
             [ reset ]
             :: floaters
 
@@ -522,7 +522,7 @@ initReactionValues : Int -> List ReactionValue
 initReactionValues n =
     Grid.fold2d
         { rows = n, cols = n }
-        (\( x, y ) result -> noiseSeeding x y :: result)
+        (\( x, y ) result -> seedMiddle x y :: result)
         []
 
 
@@ -541,7 +541,7 @@ initFloaterRandom n =
             5
 
         numScale =
-            0.7
+            2
     in
     Grid.fold2d
         { rows = floor (toFloat n * numScale), cols = floor (toFloat n * numScale) }
