@@ -97,7 +97,7 @@ init =
       , k_reaction = 0.055
       , cells = List.sortWith sortCells (initReactionValues gridSize)
       , floaters = initFloaterRandom gridSize
-      , drawField = True
+      , drawField = False
       , floater_speed = initialFloaterSpeed
       , f_slider =
             SingleSlider.init
@@ -277,7 +277,7 @@ drawItAll model =
 
     else
         shapes
-            [ fill (Color.hsla 0.9 0.2 0.2 0.001) ]
+            [ fill (Color.hsla 0.9 0.2 0.2 0.01) ]
             [ reset ]
             :: floaters
 
@@ -303,7 +303,8 @@ drawReactionCircles model r =
     in
     shapes
         [ fill (Color.hsla 1 0.8 scaledValue (scaledValue / 10)) ]
-        [ circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (cellSize * abs scaledValue)
+        [ --circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (cellSize * abs scaledValue)
+          circle ( isom.x * cellSize, isom.y * cellSize ) (cellSize * abs scaledValue)
         ]
 
 
@@ -323,10 +324,10 @@ drawFloater model floater =
             isometricPoint { x = floater.x / cellSize, y = floater.y / cellSize }
     in
     shapes
-        [ fill (Color.hsla 1 1 1 1), stroke (Color.hsla 0.5 0.5 0.5 0.1) ]
-        [ --circle ( cellSize * isom.x, cellSize * isom.y ) (clampMod (floaterSizeMod model) 0.1 100)
-          circle ( floater.x, floater.y ) (clampMod (floaterSizeMod model) 0.1 100)
+        [ fill (Color.hsla (floater.x / h) 0.7 0.7 1), stroke (Color.hsla 0.5 0.5 0.5 0.1) ]
+        [ circle ( cellSize * isom.x, cellSize * isom.y ) (clampMod (floaterSizeMod model) 0.1 100)
 
+        --circle ( floater.x, floater.y ) (clampMod (floaterSizeMod model) 0.1 100)
         --path ( h / 2, h / 2 ) [ lineTo ( floater.x, floater.y ) ]
         --path ( potentiallyFirstPoint.x, potentiallyFirstPoint.y ) [ lineTo ( floater.x, floater.y ) ]
         ]
@@ -342,7 +343,7 @@ sineMod model =
 
 floaterSizeMod : Model -> Float
 floaterSizeMod model =
-    1
+    2
 
 
 
@@ -466,19 +467,20 @@ nextFloaters model =
     List.map (nextFloater model) model.floaters
 
 
+middleAdjust =
+    1
+
+
 nextFloater : Model -> Vector -> Vector
 nextFloater model floater =
     let
-        middleAdjust =
-            0.5
-
         invert v =
             Vector
                 (v.x * -1)
                 (v.y * -1)
 
         adjust v =
-            v / cellSize
+            middleAdjust + (v / cellSize)
 
         getReactionOfLocation location =
             --Convert to indexed cells
@@ -559,9 +561,9 @@ nextFloater model floater =
 
         normalize v =
             Vector
-                (v.x / (0.0001 + sqrt ((v.x * v.x) + (v.y * v.y))))
+                (v.x / (0.0000001 + sqrt ((v.x * v.x) + (v.y * v.y))))
                 -- ( the 0.0001 is to prevent divide by zero )
-                (v.y / (0.0001 + sqrt ((v.x * v.x) + (v.y * v.y))))
+                (v.y / (0.0000001 + sqrt ((v.x * v.x) + (v.y * v.y))))
 
         floaterSpeed =
             model.floater_speed
@@ -625,16 +627,16 @@ initFloaterRandom : Int -> List Vector
 initFloaterRandom n =
     let
         noiseStrength =
-            5
+            0
 
         numScale =
-            0.7
+            0.6
     in
     Grid.fold2d
         { rows = floor (toFloat n * numScale), cols = floor (toFloat n * numScale) }
         (\( x, y ) result ->
-            Vector (cellSize / numScale * (toFloat x + (noiseStrength * noise (toFloat x) (toFloat y))))
-                (cellSize / numScale * (toFloat y + (noiseStrength * noise (toFloat x) (toFloat y))))
+            Vector (cellSize / numScale * (toFloat x + middleAdjust + (noiseStrength * noise (toFloat x) (toFloat y))))
+                (cellSize / numScale * (toFloat y + middleAdjust + (noiseStrength * noise (toFloat x) (toFloat y))))
                 :: result
         )
         []
