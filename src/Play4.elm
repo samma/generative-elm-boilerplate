@@ -1,6 +1,7 @@
 module Play4 exposing (main)
 
 -- Trying to implement Belousov-Zhabotinsky Reaction from Scientific_Computing_Simulations_and_Modeling
+-- Bilinear interp from https://blogs.sas.com/content/iml/2020/05/18/what-is-bilinear-interpolation.html
 
 import Array exposing (..)
 import Axis2d exposing (x)
