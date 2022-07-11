@@ -269,17 +269,20 @@ drawItAll model =
 
         reset =
             rect ( 0.0, 0.0 ) h h
+
+        col =
+            Color.hsla 0.35 0.5 0.5 0.005
     in
     if model.drawField then
         shapes
-            [ fill (Color.hsla 0.9 0.5 0.5 0.005) ]
+            [ fill col ]
             [ reset ]
             :: fieldCircles
             ++ floaters
 
     else
         shapes
-            [ fill (Color.hsla 0.9 0.5 0.5 0.005) ]
+            [ fill col ]
             [ reset ]
             :: floaters
 
@@ -327,7 +330,7 @@ drawFloater model floater =
     in
     shapes
         [ fill (Color.hsla (floater.x / h) 0.7 0.7 1), stroke (Color.hsla 0.5 0.5 0.5 0.1) ]
-        [ circle ( cellSize * isom.x, (cellSize * isom.y) + floaterSizeMod model ) (clampMod (floaterSizeMod model) 0.1 2.5)
+        [ circle ( cellSize * isom.x, (cellSize * isom.y) + floaterSizeMod model ) (clampMod (floaterSizeMod model) 0.1 1)
 
         --circle ( floater.x, floater.y ) (clampMod (floaterSizeMod model) 0.1 100)
         --path ( h / 2, h / 2 ) [ lineTo ( floater.x, floater.y ) ]
@@ -614,7 +617,7 @@ initReactionValues : Int -> List ReactionValue
 initReactionValues n =
     Grid.fold2d
         { rows = n, cols = n }
-        (\( x, y ) result -> seedMiddle x y :: result)
+        (\( x, y ) result -> noiseSeeding x y :: result)
         []
 
 
@@ -681,7 +684,7 @@ seedMiddle x y =
 
 permTable : PermutationTable
 permTable =
-    Simplex.permutationTableFromInt 15
+    Simplex.permutationTableFromInt 390
 
 
 
