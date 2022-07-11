@@ -302,7 +302,7 @@ drawReactionCircles model r =
     in
     shapes
         [ fill (Color.hsla 1 0.8 scaledValue (scaledValue / 10)) ]
-        [ circle ( isom.x * cellSize, isom.y * cellSize ) (cellSize * abs scaledValue)
+        [ circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (cellSize * abs scaledValue)
         ]
 
 
@@ -323,7 +323,8 @@ drawFloater model floater =
     in
     shapes
         [ fill (Color.hsla 1 1 1 1), stroke (Color.hsla 0.5 0.5 0.5 0.1) ]
-        [ circle ( cellSize * isom.x, cellSize * isom.y ) (clampMod (floaterSizeMod model) 0.1 100)
+        [ --circle ( cellSize * isom.x, cellSize * isom.y ) (clampMod (floaterSizeMod model) 0.1 100)
+          circle ( floater.x, floater.y ) (clampMod (floaterSizeMod model) 0.1 100)
 
         --path ( h / 2, h / 2 ) [ lineTo ( floater.x, floater.y ) ]
         --path ( potentiallyFirstPoint.x, potentiallyFirstPoint.y ) [ lineTo ( floater.x, floater.y ) ]
@@ -340,7 +341,7 @@ sineMod model =
 
 floaterSizeMod : Model -> Float
 floaterSizeMod model =
-    2
+    1
 
 
 
@@ -475,14 +476,82 @@ nextFloater model floater =
                 (v.x * -1)
                 (v.y * -1)
 
+        adjust v =
+            v / cellSize
+
         getReactionOfLocation location =
-            getCenter (floor (middleAdjust + (location.x / cellSize))) (floor (middleAdjust + (location.y / cellSize))) (fromList model.cells)
+            --Convert to indexed cells
+            getCenter (floor (adjust location.x)) (floor (adjust location.y)) (fromList model.cells)
 
         getGradient location =
             (getReactionOfLocation location).gradient
 
+        offset =
+            cellSize
+
+        residualDistance v =
+            adjust v - toFloat (floor (adjust v))
+
+        complementResidualDistance v =
+            1 - residualDistance v
+
+        getAveragedGradient location =
+            let
+                z00 =
+                    getGradient { x = location.x - offset, y = location.y - offset }
+
+                z10 =
+                    getGradient { x = location.x + offset, y = location.y - offset }
+
+                z01 =
+                    getGradient { x = location.x - offset, y = location.y + offset }
+
+                z11 =
+                    getGradient { x = location.x + offset, y = location.y + offset }
+
+                center =
+                    getGradient { x = 0, y = 0 }
+
+                avrx =
+                    (z00.x
+                        * complementResidualDistance location.x
+                        * complementResidualDistance location.y
+                    )
+                        + (z10.x
+                            * residualDistance location.x
+                            * complementResidualDistance location.y
+                          )
+                        + (z01.x
+                            * complementResidualDistance location.x
+                            * residualDistance location.y
+                          )
+                        + (z11.x
+                            * residualDistance location.x
+                            * complementResidualDistance location.y
+                          )
+
+                avry =
+                    (z00.y
+                        * complementResidualDistance location.x
+                        * complementResidualDistance location.y
+                    )
+                        + (z10.y
+                            * residualDistance location.x
+                            * complementResidualDistance location.y
+                          )
+                        + (z01.y
+                            * complementResidualDistance location.x
+                            * residualDistance location.y
+                          )
+                        + (z11.y
+                            * residualDistance location.x
+                            * complementResidualDistance location.y
+                          )
+            in
+            { x = avrx, y = avry }
+
         perpVec location =
-            perpendicular (getGradient location)
+            perpendicular (getAveragedGradient location)
 
         perpendicularMovement =
             normalize (invert (perpVec floater))
@@ -539,7 +608,7 @@ initReactionValues : Int -> List ReactionValue
 initReactionValues n =
     Grid.fold2d
         { rows = n, cols = n }
-        (\( x, y ) result -> noiseSeeding x y :: result)
+        (\( x, y ) result -> seedMiddle x y :: result)
         []
 
 
