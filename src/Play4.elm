@@ -2,6 +2,7 @@ module Play4 exposing (main)
 
 -- Trying to implement Belousov-Zhabotinsky Reaction from Scientific_Computing_Simulations_and_Modeling
 -- Bilinear interp from https://blogs.sas.com/content/iml/2020/05/18/what-is-bilinear-interpolation.html
+-- TODO quick ways to toggle between more shit, like iso view and so forth
 
 import Array exposing (..)
 import Axis2d exposing (x)
@@ -181,7 +182,7 @@ update msg model =
 
 h : number
 h =
-    800
+    1300
 
 
 w : number
@@ -325,7 +326,7 @@ drawFloater model floater =
     in
     shapes
         [ fill (Color.hsla (floater.x / h) 0.7 0.7 1), stroke (Color.hsla 0.5 0.5 0.5 0.1) ]
-        [ circle ( cellSize * isom.x, cellSize * isom.y ) (clampMod (floaterSizeMod model) 0.1 100)
+        [ circle ( cellSize * isom.x, (cellSize * isom.y) + floaterSizeMod model ) (clampMod (floaterSizeMod model) 0.1 100)
 
         --circle ( floater.x, floater.y ) (clampMod (floaterSizeMod model) 0.1 100)
         --path ( h / 2, h / 2 ) [ lineTo ( floater.x, floater.y ) ]
@@ -343,7 +344,11 @@ sineMod model =
 
 floaterSizeMod : Model -> Float
 floaterSizeMod model =
-    0.5 + abs (4 * sin (toFloat model.count / 50))
+    toFloat model.count / 500
+
+
+
+--0.5 + abs (4 * sin (toFloat model.count / 50))
 
 
 clampMod value min max =
@@ -464,7 +469,7 @@ nextFloaters model =
 
 
 middleAdjust =
-    5
+    0
 
 
 nextFloater : Model -> Vector -> Vector
@@ -607,7 +612,7 @@ initReactionValues : Int -> List ReactionValue
 initReactionValues n =
     Grid.fold2d
         { rows = n, cols = n }
-        (\( x, y ) result -> noiseSeeding x y :: result)
+        (\( x, y ) result -> seedMiddle x y :: result)
         []
 
 
