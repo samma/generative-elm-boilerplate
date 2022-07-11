@@ -84,10 +84,10 @@ init =
             \value -> ""
 
         initialFloaterSpeed =
-            5
+            1.5
 
         initial_f_value =
-            0.029
+            0.033
     in
     ( { seed = Random.initialSeed (floor (42 * 10000))
       , count = 0
@@ -99,8 +99,8 @@ init =
       , floater_speed = initialFloaterSpeed
       , f_slider =
             SingleSlider.init
-                { min = 0.02
-                , max = 0.055
+                { min = 0.01
+                , max = 0.056
                 , value = initial_f_value
                 , step = 0.001
                 , onChange = FSliderChange
@@ -125,7 +125,7 @@ init =
 
 
 defaultReactionValue =
-    ( 0.5, 0.25 )
+    ( 0.1, 0.1 )
 
 
 sortCells a b =
@@ -194,7 +194,7 @@ maxIter =
 
 gridSize : number
 gridSize =
-    35
+    45
 
 
 cellSize : Float
@@ -271,7 +271,6 @@ drawItAll model =
             [ fill (Color.hsla 0.5 0.2 0.2 0.005) ]
             [ reset ]
             :: floaters
-            ++ fieldCircles
 
     else
         shapes
@@ -297,7 +296,7 @@ drawReactionCircles model r =
             scaleReactionValsToColor r.vValue 0.01 0.5
     in
     shapes
-        [ fill (Color.hsla 1 0.5 scaledValue scaledValue) ]
+        [ fill (Color.hsla 1 0.8 scaledValue (scaledValue / 10)) ]
         [ circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (cellSize * abs scaledValue)
         ]
 
@@ -308,17 +307,27 @@ drawReactionCircles model r =
 --[ rect ( toFloat r.x * cellSize, toFloat r.y * cellSize ) cellSize cellSize ]
 
 
+drawFloater : Model -> Vector -> Renderable
+drawFloater model floater =
+    shapes
+        [ fill (Color.hsla 1 1 1 1) ]
+        [ circle ( floater.x, floater.y ) (clampMod (floaterSizeMod model) 0.1 100)
+
+        --arc ( floater.x, floater.y ) 40 { startAngle = degrees 15, endAngle = degrees 85, clockwise = True }
+        ]
+
+
 sineMod model =
     0.5 + sin (toFloat model.count / 200) / 2
 
 
 floaterSizeMod : Model -> Float
 floaterSizeMod model =
-    10
+    0.9
 
 
 
---0.5 + abs (sin (toFloat model.count / 10))
+--0.5 + abs (4 * sin (toFloat model.count / 50))
 
 
 clampMod value min max =
@@ -331,16 +340,6 @@ clampMod value min max =
 
     else
         value
-
-
-drawFloater : Model -> Vector -> Renderable
-drawFloater model floater =
-    shapes
-        [ fill (Color.hsla 1 0.7 0.5 0.9) ]
-        [ circle ( floater.x, floater.y ) (clampMod (floaterSizeMod model) 0.1 7)
-
-        --arc ( floater.x, floater.y ) 40 { startAngle = degrees 15, endAngle = degrees 85, clockwise = True }
-        ]
 
 
 drawPerpendicularLines : Model -> ReactionValue -> Renderable
@@ -469,7 +468,7 @@ nextFloater model floater =
             perpendicular (getGradient location)
 
         perpendicularMovement =
-            invert (perpVec floater)
+            normalize (invert (perpVec floater))
 
         normalize v =
             Vector
@@ -523,7 +522,7 @@ initReactionValues : Int -> List ReactionValue
 initReactionValues n =
     Grid.fold2d
         { rows = n, cols = n }
-        (\( x, y ) result -> seedMiddle x y :: result)
+        (\( x, y ) result -> noiseSeeding x y :: result)
         []
 
 
@@ -539,10 +538,10 @@ initFloaterRandom : Int -> List Vector
 initFloaterRandom n =
     let
         noiseStrength =
-            0
+            5
 
         numScale =
-            1
+            0.7
     in
     Grid.fold2d
         { rows = floor (toFloat n * numScale), cols = floor (toFloat n * numScale) }
@@ -590,7 +589,7 @@ seedMiddle x y =
 
 permTable : PermutationTable
 permTable =
-    Simplex.permutationTableFromInt 23
+    Simplex.permutationTableFromInt 11
 
 
 
