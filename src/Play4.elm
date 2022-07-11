@@ -269,13 +269,13 @@ drawItAll model =
     in
     if model.drawField then
         shapes
-            [ fill (Color.hsla 0.5 0.2 0.2 0.005) ]
+            [ fill (Color.hsla 0.9 0.2 0.2 0.01) ]
             [ reset ]
             :: floaters
 
     else
         shapes
-            [ fill (Color.hsla 0.5 0.2 0.2 0.005) ]
+            [ fill (Color.hsla 0.9 0.2 0.2 0.001) ]
             [ reset ]
             :: floaters
 
@@ -530,7 +530,7 @@ initReactionValues : Int -> List ReactionValue
 initReactionValues n =
     Grid.fold2d
         { rows = n, cols = n }
-        (\( x, y ) result -> noiseSeeding x y :: result)
+        (\( x, y ) result -> seedMiddle x y :: result)
         []
 
 
@@ -549,7 +549,7 @@ initFloaterRandom n =
             5
 
         numScale =
-            0.5
+            0.2
     in
     Grid.fold2d
         { rows = floor (toFloat n * numScale), cols = floor (toFloat n * numScale) }
