@@ -340,7 +340,7 @@ sineMod model =
 
 floaterSizeMod : Model -> Float
 floaterSizeMod model =
-    0.9
+    2
 
 
 
@@ -637,4 +637,4 @@ rVal =
 
 isometricPoint : Vector -> Vector
 isometricPoint v =
-    Vector (v.x - v.y + (gridSize / 2)) ((v.x + v.y) / 2)
+    Vector (((v.x - v.y) / 2) + (gridSize / 2)) ((v.x + v.y) / 2)
