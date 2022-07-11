@@ -180,7 +180,7 @@ update msg model =
 
 h : number
 h =
-    1000
+    800
 
 
 w : number
@@ -271,7 +271,8 @@ drawItAll model =
         shapes
             [ fill (Color.hsla 0.9 0.2 0.2 0.01) ]
             [ reset ]
-            :: floaters
+            :: fieldCircles
+            ++ floaters
 
     else
         shapes
@@ -295,10 +296,13 @@ drawReactionCircles model r =
     let
         scaledValue =
             scaleReactionValsToColor r.vValue 0.01 0.5
+
+        isom =
+            isometricPoint { x = toFloat r.x, y = toFloat r.y }
     in
     shapes
         [ fill (Color.hsla 1 0.8 scaledValue (scaledValue / 10)) ]
-        [ circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (cellSize * abs scaledValue)
+        [ circle ( isom.x * cellSize, isom.y * cellSize ) (cellSize * abs scaledValue)
         ]
 
 
@@ -313,11 +317,16 @@ drawFloater model floater =
     let
         potentiallyFirstPoint =
             Maybe.withDefault { x = 0, y = 0 } (List.head model.floaters)
+
+        isom =
+            isometricPoint { x = floater.x / cellSize, y = floater.y / cellSize }
     in
     shapes
-        [ fill (Color.hsla 1 1 1 1), stroke (Color.hsla 0.5 0.5 0.5 0.3) ]
-        [ --circle ( floater.x, floater.y ) (clampMod (floaterSizeMod model) 0.1 100)
-          path ( potentiallyFirstPoint.x, potentiallyFirstPoint.y ) [ lineTo ( floater.x, floater.y ) ]
+        [ fill (Color.hsla 1 1 1 1), stroke (Color.hsla 0.5 0.5 0.5 0.1) ]
+        [ circle ( cellSize * isom.x, cellSize * isom.y ) (clampMod (floaterSizeMod model) 0.1 100)
+
+        --path ( h / 2, h / 2 ) [ lineTo ( floater.x, floater.y ) ]
+        --path ( potentiallyFirstPoint.x, potentiallyFirstPoint.y ) [ lineTo ( floater.x, floater.y ) ]
         ]
 
 
@@ -549,7 +558,7 @@ initFloaterRandom n =
             5
 
         numScale =
-            0.2
+            0.5
     in
     Grid.fold2d
         { rows = floor (toFloat n * numScale), cols = floor (toFloat n * numScale) }
@@ -624,3 +633,8 @@ rVal =
         , prevuValue = pu
         , prevvValue = pv
         }
+
+
+isometricPoint : Vector -> Vector
+isometricPoint v =
+    Vector (v.x - v.y + (gridSize / 2)) ((v.x + v.y) / 2)
