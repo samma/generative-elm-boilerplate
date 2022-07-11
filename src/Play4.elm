@@ -693,7 +693,7 @@ permTable =
 
 noise : Float -> Float -> Float
 noise =
-    Simplex.fractal2d { scale = 1, steps = 4, stepSize = 3.0, persistence = 2.0 } permTable
+    Simplex.fractal2d { scale = 1.3, steps = 4, stepSize = 3.0, persistence = 2.0 } permTable
 
 
 
