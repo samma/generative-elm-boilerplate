@@ -183,7 +183,7 @@ update msg model =
 
 h : number
 h =
-    1300
+    4000
 
 
 w : number
@@ -272,6 +272,8 @@ drawItAll model =
 
         col =
             Color.hsla (sin (toFloat model.count / 100)) 0.5 0.5 0.005
+
+        --Color.hsla (sin (toFloat model.count / 100)) 0.5 0.5 0.005
     in
     if model.drawField then
         shapes
@@ -329,8 +331,8 @@ drawFloater model floater =
             isometricPoint { x = floater.x / cellSize, y = floater.y / cellSize }
     in
     shapes
-        [ fill (Color.hsla (floater.x / h) 0.7 0.7 1), stroke (Color.hsla 0.5 0.5 0.5 0.1) ]
-        [ circle ( cellSize * isom.x, (cellSize * isom.y) + floaterSizeMod model ) (clampMod (floaterSizeMod model) 0.1 1)
+        [ fill (Color.hsla 0.6 0.5 (sin (radians floater.x / gridSize)) 1), stroke (Color.hsla 0.5 0.5 0.5 0.1) ]
+        [ circle ( cellSize * isom.x, (cellSize * isom.y) + floaterSizeMod model ) (clampMod (floaterSizeMod model) 0.1 1000)
 
         --circle ( floater.x, floater.y ) (clampMod (floaterSizeMod model) 0.1 100)
         --path ( h / 2, h / 2 ) [ lineTo ( floater.x, floater.y ) ]
@@ -348,10 +350,11 @@ sineMod model =
 
 floaterSizeMod : Model -> Float
 floaterSizeMod model =
-    toFloat model.count / 500
+    100
 
 
 
+--    toFloat model.count / 500
 --0.5 + abs (4 * sin (toFloat model.count / 50))
 
 
@@ -684,7 +687,7 @@ seedMiddle x y =
 
 permTable : PermutationTable
 permTable =
-    Simplex.permutationTableFromInt 390
+    Simplex.permutationTableFromInt 1
 
 
 
@@ -693,7 +696,7 @@ permTable =
 
 noise : Float -> Float -> Float
 noise =
-    Simplex.fractal2d { scale = 1.3, steps = 4, stepSize = 3.0, persistence = 2.0 } permTable
+    Simplex.fractal2d { scale = 2, steps = 4, stepSize = 3.0, persistence = 2.0 } permTable
 
 
 
