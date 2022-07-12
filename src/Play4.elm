@@ -329,9 +329,12 @@ drawFloater model floater =
 
         isom =
             isometricPoint { x = floater.x / cellSize, y = floater.y / cellSize }
+
+        wave =
+            sin (radians floater.x / h * 23)
     in
     shapes
-        [ fill (Color.hsla 0.6 0.5 (sin (radians floater.x / gridSize)) 1), stroke (Color.hsla 0.5 0.5 0.5 0.1) ]
+        [ fill (Color.hsla 0.6 0.5 wave 1), stroke (Color.hsla 0.5 0.5 0.5 0.1) ]
         [ circle ( cellSize * isom.x, (cellSize * isom.y) + floaterSizeMod model ) (clampMod (floaterSizeMod model) 0.1 1000)
 
         --circle ( floater.x, floater.y ) (clampMod (floaterSizeMod model) 0.1 100)
