@@ -271,7 +271,7 @@ drawItAll model =
             rect ( 0.0, 0.0 ) h h
 
         col =
-            Color.hsla (sin (toFloat model.count / 100)) 0.5 0.5 0.005
+            Color.hsla (sin (toFloat model.count / 100)) 1 1 0.005
 
         --Color.hsla (sin (toFloat model.count / 100)) 0.5 0.5 0.005
     in
@@ -307,9 +307,12 @@ drawReactionCircles model r =
 
         isom =
             isometricPoint { x = toFloat r.x, y = toFloat r.y }
+
+        hm =
+            sin (radians (toFloat r.x) / h * 23)
     in
     shapes
-        [ fill (Color.hsla 1 0.8 scaledValue (scaledValue / 10)) ]
+        [ fill (Color.hsla 0.6 0.5 (2 * hm) 0.1) ]
         [ --circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (cellSize * abs scaledValue)
           circle ( isom.x * cellSize, isom.y * cellSize ) (cellSize * abs scaledValue)
         ]
@@ -721,4 +724,4 @@ rVal =
 
 isometricPoint : Vector -> Vector
 isometricPoint v =
-    Vector (((v.x - v.y) / sqrt 2) + (gridSize / 2)) ((v.x + v.y) / 2)
+    Vector ((((v.x - v.y) / sqrt 2) + (gridSize / 2)) / 2) ((v.x + v.y) / 2)
