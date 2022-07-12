@@ -604,7 +604,7 @@ nextFloater model floater =
                     v.y
                 )
     in
-    stayInsideBorders (Vector (floater.x + (floaterSpeed * perpendicularMovement.x)) (floater.y + (floaterSpeed * perpendicularMovement.y)))
+    Vector (floater.x + (floaterSpeed * perpendicularMovement.x)) (floater.y + (floaterSpeed * perpendicularMovement.y))
 
 
 indexToCoord : Int -> ( Int, Int )
