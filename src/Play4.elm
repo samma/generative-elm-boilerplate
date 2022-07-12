@@ -584,11 +584,15 @@ nextFloater model floater =
             model.floater_speed
 
         stayInsideBorders v =
+            let
+                scale =
+                    1
+            in
             Vector
                 (if v.x < 0 then
-                    h
+                    scale * h
 
-                 else if v.x >= h then
+                 else if v.x >= scale * h then
                     0
 
                  else
@@ -626,7 +630,7 @@ initReactionValues : Int -> List ReactionValue
 initReactionValues n =
     Grid.fold2d
         { rows = n, cols = n }
-        (\( x, y ) result -> noiseSeeding x y :: result)
+        (\( x, y ) result -> seedMiddle x y :: result)
         []
 
 
