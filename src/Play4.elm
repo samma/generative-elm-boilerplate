@@ -724,4 +724,4 @@ rVal =
 
 isometricPoint : Vector -> Vector
 isometricPoint v =
-    Vector ((((v.x - v.y) / sqrt 2) + (gridSize / 2)) / 2) ((v.x + v.y) / 2)
+    Vector (((v.x - v.y) * 0.4) + (gridSize / 2)) (2 + (v.x + v.y) / 2.4)
