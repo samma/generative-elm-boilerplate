@@ -251,8 +251,8 @@ drawItAll model =
 
         floaters =
             List.map (drawFloater model) model.floaters
+                ++ List.map (drawFloater2 model) model.floaters
 
-        --++ List.map (drawFloater2 model) model.floaters
         reset =
             rect ( 0.0, 0.0 ) h h
 
