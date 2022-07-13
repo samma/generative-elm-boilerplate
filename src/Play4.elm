@@ -298,7 +298,7 @@ drawReactionCircles model r =
             sin (radians (toFloat r.x) / h * 23)
     in
     shapes
-        [ fill (Color.hsla 0.6 0.5 (2 * hm) 0.1) ]
+        [ fill (Color.hsla 0.95 0.5 (2 * hm) 0.1) ]
         [ --circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (cellSize * abs scaledValue)
           circle ( isom.x * cellSize, isom.y * cellSize ) (cellSize * abs scaledValue)
         ]
@@ -336,10 +336,12 @@ drawFloater2 model floater =
             isometricPoint { x = floater.x / cellSize, y = floater.y / cellSize }
 
         wave =
-            sin (radians floater.x / h * 23) / 2
+            0.9
+
+        -- sin (radians floater.x / h * 23) / 2
     in
     shapes
-        [ fill (Color.hsla 0.1 0.4 wave 0.01), stroke (Color.hsla 0.5 0.5 0.5 0.1) ]
+        [ fill (Color.hsla 0.6 0.4 wave 0.01), stroke (Color.hsla 0.5 0.5 0.5 0.1) ]
         [ circle ( cellSize * isom.x, (cellSize * isom.y) + floaterSizeMod model ) (clampMod 90 0.1 1000) ]
 
 
@@ -627,7 +629,7 @@ initReactionValues : Int -> List ReactionValue
 initReactionValues n =
     Grid.fold2d
         { rows = n, cols = n }
-        (\( x, y ) result -> seedMiddle x y :: result)
+        (\( x, y ) result -> noiseSeeding x y :: result)
         []
 
 
@@ -694,7 +696,7 @@ seedMiddle x y =
 
 permTable : PermutationTable
 permTable =
-    Simplex.permutationTableFromInt 1
+    Simplex.permutationTableFromInt 76
 
 
 
