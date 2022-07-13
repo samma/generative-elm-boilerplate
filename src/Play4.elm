@@ -27,21 +27,21 @@ import Vector2d exposing (Vector2d)
 
 
 type alias Model =
-    { seed : Random.Seed
-    , count : Int
-    , k_reaction : Float
-    , f_reaction : Float
-    , cells : List ReactionValue
-    , floaters : List Vector
-    , drawField : Bool
-    , f_slider : SingleSlider.SingleSlider Msg
-    , floater_speed_slider : SingleSlider.SingleSlider Msg
-    , floater_speed : Float
+    { seed : Random.Seed -- Used to create the deterministic random numbers
+    , tick : Int -- How many iterations the program has run
+    , k_reaction : Float -- The rate of kill reaction
+    , f_reaction : Float -- The rate of feed reaction
+    , cells : List ReactionValue -- The current state of the grid
+    , floaters : List Vector -- The current state of the floaters
+    , drawField : Bool -- Whether to draw the field or not
+    , f_slider : SingleSlider.SingleSlider Msg -- The slider for manually controlling the feed reaction rate
+    , floater_speed_slider : SingleSlider.SingleSlider Msg -- The slider for manually controlling the floater speed
+    , floater_speed : Float -- The speed of the floaters
     }
 
 
 type Msg
-    = AnimationFrame Posix
+    = AnimationFrame Posix -- Animations frames driven from outside
     | SwapMode
     | FSliderChange Float
     | FloaterSpeedChange Float
@@ -94,7 +94,7 @@ init =
             0.027
     in
     ( { seed = Random.initialSeed (floor (42 * 10000))
-      , count = 0
+      , tick = 0
       , f_reaction = initial_f_value
       , k_reaction = 0.055
       , cells = List.sortWith sortCells (initReactionValues gridSize)
@@ -128,22 +128,6 @@ init =
     )
 
 
-defaultReactionValue =
-    ( 0.5, 0.25 )
-
-
-sortCells a b =
-    case compare (coordToIndex ( a.x, a.y )) (coordToIndex ( b.x, b.y )) of
-        EQ ->
-            EQ
-
-        GT ->
-            GT
-
-        LT ->
-            LT
-
-
 subscriptions : Model -> Sub Msg
 subscriptions _ =
     onAnimationFrame AnimationFrame
@@ -153,12 +137,13 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         AnimationFrame _ ->
-            if model.count < maxIter then
+            if model.tick < maxIter then
                 ( iterateModel model
                 , Cmd.none
                 )
 
             else
+                -- TODO trigger final snapshot of the canvas here.
                 ( model, Cmd.none )
 
         SwapMode ->
@@ -247,12 +232,12 @@ iterateModel : Model -> Model
 iterateModel model =
     let
         nextCells =
-            nextVals model
+            nextCellVals model
 
         nextFloaterCalc =
             nextFloaters model
     in
-    { model | cells = nextCells, count = model.count + 1, floaters = nextFloaterCalc }
+    { model | cells = nextCells, tick = model.tick + 1, floaters = nextFloaterCalc }
 
 
 drawItAll : Model -> List Renderable
@@ -266,12 +251,13 @@ drawItAll model =
 
         floaters =
             List.map (drawFloater model) model.floaters
+                ++ List.map (drawFloater2 model) model.floaters
 
         reset =
             rect ( 0.0, 0.0 ) h h
 
         col =
-            Color.hsla (sin (toFloat model.count / 100)) 1 1 0.005
+            Color.hsla (sin (toFloat model.tick / 100)) 1 1 0.005
 
         --Color.hsla (sin (toFloat model.count / 100)) 0.5 0.5 0.005
     in
@@ -322,14 +308,13 @@ drawReactionCircles model r =
 --[ rect ( toFloat r.x * cellSize, toFloat r.y * cellSize ) cellSize cellSize ]
 --[ circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (cellSize / 1.9) ]
 --[ rect ( toFloat r.x * cellSize, toFloat r.y * cellSize ) cellSize cellSize ]
+--potentiallyFirstPoint =
+--  Maybe.withDefault { x = 0, y = 0 } (List.head model.floaters)
 
 
 drawFloater : Model -> Vector -> Renderable
 drawFloater model floater =
     let
-        potentiallyFirstPoint =
-            Maybe.withDefault { x = 0, y = 0 } (List.head model.floaters)
-
         isom =
             isometricPoint { x = floater.x / cellSize, y = floater.y / cellSize }
 
@@ -338,12 +323,21 @@ drawFloater model floater =
     in
     shapes
         [ fill (Color.hsla 0.6 0.5 wave 0.01), stroke (Color.hsla 0.5 0.5 0.5 0.1) ]
-        [ circle ( cellSize * isom.x, (cellSize * isom.y) + floaterSizeMod model ) (clampMod (floaterSizeMod model) 0.1 1000)
+        [ circle ( cellSize * isom.x, (cellSize * isom.y) + floaterSizeMod model ) (clampMod (floaterSizeMod model) 0.1 1000) ]
 
-        --circle ( floater.x, floater.y ) (clampMod (floaterSizeMod model) 0.1 100)
-        --path ( h / 2, h / 2 ) [ lineTo ( floater.x, floater.y ) ]
-        --path ( potentiallyFirstPoint.x, potentiallyFirstPoint.y ) [ lineTo ( floater.x, floater.y ) ]
-        ]
+
+drawFloater2 : Model -> Vector -> Renderable
+drawFloater2 model floater =
+    let
+        isom =
+            isometricPoint { x = floater.x / cellSize, y = floater.y / cellSize }
+
+        wave =
+            sin (radians floater.x / h * 23) / 2
+    in
+    shapes
+        [ fill (Color.hsla 0.1 0.4 wave 0.01), stroke (Color.hsla 0.5 0.5 0.5 0.1) ]
+        [ circle ( cellSize * isom.x, (cellSize * isom.y) + floaterSizeMod model ) (clampMod 90 0.1 1000) ]
 
 
 
@@ -399,8 +393,8 @@ scaleReactionValsToColor val minVal maxVal =
     (val - minVal) / (maxVal - minVal)
 
 
-nextVals : Model -> List ReactionValue
-nextVals model =
+nextCellVals : Model -> List ReactionValue
+nextCellVals model =
     let
         reactionArr =
             fromList model.cells
@@ -729,3 +723,19 @@ rVal =
 isometricPoint : Vector -> Vector
 isometricPoint v =
     Vector (((v.x - v.y) * 0.4) + (gridSize / 2)) (2 + (v.x + v.y) / 2.4)
+
+
+defaultReactionValue =
+    ( 0.5, 0.25 )
+
+
+sortCells a b =
+    case compare (coordToIndex ( a.x, a.y )) (coordToIndex ( b.x, b.y )) of
+        EQ ->
+            EQ
+
+        GT ->
+            GT
+
+        LT ->
+            LT
