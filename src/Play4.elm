@@ -87,7 +87,7 @@ init =
             \value -> ""
 
         initialFloaterSpeed =
-            1
+            20
 
         -- h / gridSize / 4
         initial_f_value =
@@ -251,8 +251,8 @@ drawItAll model =
 
         floaters =
             List.map (drawFloater model) model.floaters
-                ++ List.map (drawFloater2 model) model.floaters
 
+        --++ List.map (drawFloater2 model) model.floaters
         reset =
             rect ( 0.0, 0.0 ) h h
 
@@ -320,9 +320,12 @@ drawFloater model floater =
 
         wave =
             sin (radians floater.x / h * 23)
+
+        ramp =
+            floater.x / h
     in
     shapes
-        [ fill (Color.hsla 0.6 0.5 wave 0.01), stroke (Color.hsla 0.5 0.5 0.5 0.1) ]
+        [ fill (Color.hsla 0.6 0.5 0.8 0.01), stroke (Color.hsla 0.5 0.5 0.5 0.1) ]
         [ circle ( cellSize * isom.x, (cellSize * isom.y) + floaterSizeMod model ) (clampMod (floaterSizeMod model) 0.1 1000) ]
 
 
