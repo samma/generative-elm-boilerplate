@@ -99,7 +99,7 @@ init =
       , k_reaction = 0.055
       , cells = List.sortWith sortCells (initReactionValues gridSize)
       , floaters = initFloaterRandom gridSize
-      , drawField = False
+      , drawField = True
       , floater_speed = initialFloaterSpeed
       , f_slider =
             SingleSlider.init
@@ -237,7 +237,11 @@ iterateModel model =
         nextFloaterCalc =
             nextFloaters model
     in
-    { model | cells = nextCells, tick = model.tick + 1, floaters = nextFloaterCalc }
+    { model | cells = nextCells, tick = model.tick + 1 }
+
+
+
+--, floaters = nextFloaterCalc }
 
 
 drawItAll : Model -> List Renderable
@@ -245,6 +249,9 @@ drawItAll model =
     let
         fieldCircles =
             List.map (drawReactionCircles model) model.cells
+
+        complementaryFieldCircles =
+            List.map (drawComplementaryReactionCircles model) model.cells
 
         debugLines =
             List.map (drawPerpendicularLines model) model.cells
@@ -257,16 +264,16 @@ drawItAll model =
             rect ( 0.0, 0.0 ) h h
 
         col =
-            Color.hsla (sin (toFloat model.tick / 100)) 1 1 0.005
+            Color.hsla 0.5 (sin (toFloat model.tick / 100)) 0.2 0.5
 
         --Color.hsla (sin (toFloat model.count / 100)) 0.5 0.5 0.005
     in
     if model.drawField then
         shapes
             [ fill col ]
-            [ reset ]
-            :: fieldCircles
-            ++ floaters
+            []
+            :: complementaryFieldCircles
+            ++ fieldCircles
 
     else
         shapes
@@ -285,11 +292,11 @@ drawItAll model =
 --List.map (drawPerpendicularLines model) model.cells
 
 
-drawReactionCircles : Model -> ReactionValue -> Renderable
-drawReactionCircles model r =
+drawComplementaryReactionCircles : Model -> ReactionValue -> Renderable
+drawComplementaryReactionCircles model r =
     let
         scaledValue =
-            scaleReactionValsToColor r.vValue 0.01 0.5
+            scaleReactionValsToColor r.uValue 0.1 1
 
         isom =
             isometricPoint { x = toFloat r.x, y = toFloat r.y }
@@ -298,7 +305,26 @@ drawReactionCircles model r =
             sin (radians (toFloat r.x) / h * 23)
     in
     shapes
-        [ fill (Color.hsla 0.1 0.5 (2 * hm) 0.1) ]
+        [ fill (Color.hsla 0.3 0.3 0.5 0.4) ]
+        [ --circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (cellSize * abs scaledValue)
+          circle ( isom.x * cellSize, isom.y * cellSize ) (cellSize * abs scaledValue)
+        ]
+
+
+drawReactionCircles : Model -> ReactionValue -> Renderable
+drawReactionCircles model r =
+    let
+        scaledValue =
+            scaleReactionValsToColor r.vValue 0.1 0.5
+
+        isom =
+            isometricPoint { x = toFloat r.x, y = toFloat r.y }
+
+        hm =
+            sin (radians (toFloat r.x) / h * 23)
+    in
+    shapes
+        [ fill (Color.hsla 0.1 0.5 (2 * hm) 0.9) ]
         [ --circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (cellSize * abs scaledValue)
           circle ( isom.x * cellSize, isom.y * cellSize ) (cellSize * abs scaledValue)
         ]
@@ -481,7 +507,7 @@ nextFloaters model =
 
 
 middleAdjust =
-    0
+    0.1
 
 
 nextFloater : Model -> Vector -> Vector
@@ -629,7 +655,7 @@ initReactionValues : Int -> List ReactionValue
 initReactionValues n =
     Grid.fold2d
         { rows = n, cols = n }
-        (\( x, y ) result -> noiseSeeding x y :: result)
+        (\( x, y ) result -> seedCorner x y :: result)
         []
 
 
@@ -678,7 +704,7 @@ seedMiddle : Int -> Int -> ReactionValue
 seedMiddle x y =
     let
         thickness =
-            2
+            9
 
         middle =
             floor (gridSize / 2)
