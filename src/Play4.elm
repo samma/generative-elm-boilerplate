@@ -272,14 +272,15 @@ drawItAll model =
         shapes
             [ fill col ]
             []
-            :: complementaryFieldCircles
-            ++ fieldCircles
+            :: fieldCircles
+            ++ complementaryFieldCircles
 
     else
         shapes
             [ fill col ]
-            [ reset ]
-            :: floaters
+            []
+            :: complementaryFieldCircles
+            ++ fieldCircles
 
 
 
@@ -302,10 +303,10 @@ drawComplementaryReactionCircles model r =
             isometricPoint { x = toFloat r.x, y = toFloat r.y }
 
         hm =
-            sin (radians (toFloat r.x) / h * 23)
+            sin (radians (toFloat r.y) / h * 23)
     in
     shapes
-        [ fill (Color.hsla 0.3 0.3 0.5 0.4) ]
+        [ fill (Color.hsla 0.5 0.3 (1 * hm) 0.1) ]
         [ --circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (cellSize * abs scaledValue)
           circle ( isom.x * cellSize, isom.y * cellSize ) (cellSize * abs scaledValue)
         ]
@@ -324,7 +325,7 @@ drawReactionCircles model r =
             sin (radians (toFloat r.x) / h * 23)
     in
     shapes
-        [ fill (Color.hsla 0.1 0.5 (2 * hm) 0.9) ]
+        [ fill (Color.hsla 0.1 0.5 (2 * hm) 0.5) ]
         [ --circle ( toFloat r.x * cellSize, toFloat r.y * cellSize ) (cellSize * abs scaledValue)
           circle ( isom.x * cellSize, isom.y * cellSize ) (cellSize * abs scaledValue)
         ]
@@ -655,7 +656,7 @@ initReactionValues : Int -> List ReactionValue
 initReactionValues n =
     Grid.fold2d
         { rows = n, cols = n }
-        (\( x, y ) result -> seedCorner x y :: result)
+        (\( x, y ) result -> seedMiddle x y :: result)
         []
 
 
@@ -753,7 +754,7 @@ rVal =
 
 isometricPoint : Vector -> Vector
 isometricPoint v =
-    Vector (((v.x - v.y) * 0.4) + (gridSize / 2)) (2 + (v.x + v.y) / 2.4)
+    Vector (1.9 * (v.x - v.y) + (gridSize / 2)) (2 + (v.x + v.y) / 2.4)
 
 
 defaultReactionValue =
