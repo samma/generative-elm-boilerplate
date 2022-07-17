@@ -754,7 +754,7 @@ rVal =
 
 isometricPoint : Vector -> Vector
 isometricPoint v =
-    Vector (1.9 * (v.x - v.y) + (gridSize / 2)) (2 + (v.x + v.y) / 2.4)
+    Vector (4 * (v.x - v.y) + (gridSize / 2)) (10 + (v.x + v.y) / 5)
 
 
 defaultReactionValue =
