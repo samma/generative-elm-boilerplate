@@ -79,17 +79,17 @@ zeroToOnegenerator =
 
 armLengthgenerator : Generator Float
 armLengthgenerator =
-    Random.float 0.1 0.2
+    Random.float 0.3 0.3
 
 
 speedGenerator : Generator Float
 speedGenerator =
-    Random.float 5 99
+    Random.float 70 70
 
 
 sizeGenerator : Generator Float
 sizeGenerator =
-    Random.float 1 5
+    Random.float 3 3
 
 
 init : E.Value -> ( Model, Cmd Msg )
@@ -102,7 +102,7 @@ init flags =
                     Random.initialSeed (Maybe.withDefault 0 (String.toInt (Hash.toString (Hash.fromString decodedFlags.fxhash))))
 
                 -- TODO is this way of generating unque random numbers with known seeds the only way?
-                -- Note that seeds are sort of daisyChained, this allows different deterministic random number to be generated
+                -- Note that seeds are daisychained, this allows for different deterministic random numbers to be generated
                 ( armLength, seed1 ) =
                     Random.step armLengthgenerator initialSeed
 
@@ -140,6 +140,10 @@ init flags =
             }
     , Cmd.none
     )
+
+
+incrFrames model =
+    { model | location = nextLocation model }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )

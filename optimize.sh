@@ -2,8 +2,8 @@
 
 set -e
 
-js="ball.js"
-min="ball.min.js"
+js="play3.js"
+min="play3.min.js"
 
 elm make --optimize --output=$js $@
 

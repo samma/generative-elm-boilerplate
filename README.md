@@ -19,3 +19,4 @@ elm-canvas.js
 elm.json
 index.html
 
+elm-live src/DynamicParticles.elm --open -- --output=DynamicParticles.js
